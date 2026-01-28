@@ -204,9 +204,14 @@ class ParkPalAPITester:
             self.log_test("Create Booking Checkout", False, "No guest token or spot ID")
             return False
             
-        # First make sure spot is active
+        # First make sure spot is active - check current status and toggle if needed
         if self.host_token:
-            self.make_request('POST', f'spots/{self.test_spot_id}/toggle', {}, self.host_token)
+            # Get current spot status
+            success, spot_data = self.make_request('GET', f'spots/{self.test_spot_id}')
+            if success and not spot_data.get('is_active'):
+                # Toggle to make it active
+                self.make_request('POST', f'spots/{self.test_spot_id}/toggle', {}, self.host_token)
+                time.sleep(1)  # Wait a moment for the change to take effect
             
         booking_data = {
             "spot_id": self.test_spot_id,
