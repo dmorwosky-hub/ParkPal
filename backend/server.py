@@ -103,6 +103,8 @@ class ParkingSpotResponse(BaseModel):
     description: Optional[str] = None
     is_active: bool
     auto_off_time: Optional[str] = None
+    is_promoted: bool = False
+    promotion_expires: Optional[str] = None
     created_at: str
 
 class BookingCreate(BaseModel):
