@@ -295,6 +295,8 @@ async def create_parking_spot(spot_data: ParkingSpotCreate, user: dict = Depends
         "description": spot_data.description,
         "is_active": False,
         "auto_off_time": None,
+        "is_promoted": False,
+        "promotion_expires": None,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     await db.parking_spots.insert_one(spot_doc)
