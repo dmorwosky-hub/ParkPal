@@ -13,7 +13,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { 
   Car, MapPin, Search, Filter, DollarSign, Clock, Navigation, 
-  LogOut, Bell, X, ChevronRight, Loader2
+  LogOut, Bell, X, ChevronRight, Loader2, Star
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
