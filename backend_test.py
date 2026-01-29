@@ -383,7 +383,11 @@ class ParkPalAPITester:
             self.test_create_booking_checkout,
             self.test_get_notifications,
             self.test_get_bookings,
-            self.test_report_violation
+            self.test_report_violation,
+            self.test_get_promotion_packages,
+            self.test_create_promotion_checkout,
+            self.test_check_promotion_status,
+            self.test_promoted_spots_first_in_results
         ]
         
         for test in tests:
