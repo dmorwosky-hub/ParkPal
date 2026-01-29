@@ -67,10 +67,9 @@ const createMarkerIcon = (isSelected = false, isPromoted = false) => {
         z-index: -1;
       "></div>
       ` : ''}
-      ` : ''}
     `,
-    iconSize: [isSelected ? 40 : 32, isSelected ? 40 : 32],
-    iconAnchor: [isSelected ? 20 : 16, isSelected ? 20 : 16],
+    iconSize: [isSelected ? 44 : 36, isSelected ? 44 : 36],
+    iconAnchor: [isSelected ? 22 : 18, isSelected ? 22 : 18],
   });
 };
 
