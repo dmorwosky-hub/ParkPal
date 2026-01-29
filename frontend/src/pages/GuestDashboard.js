@@ -22,14 +22,15 @@ import 'leaflet/dist/leaflet.css';
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 // Custom marker icon
-const createMarkerIcon = (isSelected = false) => {
+const createMarkerIcon = (isSelected = false, isPromoted = false) => {
+  const bgColor = isPromoted ? '#9B59B6' : '#E67E22';
   return L.divIcon({
     className: 'custom-marker-wrapper',
     html: `
       <div style="
-        width: ${isSelected ? '40px' : '32px'};
-        height: ${isSelected ? '40px' : '32px'};
-        background: #E67E22;
+        width: ${isSelected ? '44px' : '36px'};
+        height: ${isSelected ? '44px' : '36px'};
+        background: ${bgColor};
         border-radius: 50%;
         border: 3px solid white;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
@@ -38,13 +39,20 @@ const createMarkerIcon = (isSelected = false) => {
         justify-content: center;
         transition: all 0.2s;
         ${isSelected ? 'transform: scale(1.2);' : ''}
+        ${isPromoted ? 'animation: promoted-glow 2s ease-in-out infinite;' : ''}
       ">
-        <div style="
-          width: 8px;
-          height: 8px;
-          background: white;
-          border-radius: 50%;
-        "></div>
+        ${isPromoted ? `
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="2">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          </svg>
+        ` : `
+          <div style="
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+          "></div>
+        `}
       </div>
       ${!isSelected ? `
       <div class="map-pin-pulse" style="
@@ -54,10 +62,11 @@ const createMarkerIcon = (isSelected = false) => {
         transform: translate(-50%, -50%);
         width: 50px;
         height: 50px;
-        background: rgba(230, 126, 34, 0.3);
+        background: ${isPromoted ? 'rgba(155, 89, 182, 0.3)' : 'rgba(230, 126, 34, 0.3)'};
         border-radius: 50%;
         z-index: -1;
       "></div>
+      ` : ''}
       ` : ''}
     `,
     iconSize: [isSelected ? 40 : 32, isSelected ? 40 : 32],
