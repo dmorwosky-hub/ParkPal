@@ -388,11 +388,21 @@ const GuestDashboard = () => {
                   Back to list
                 </Button>
                 
-                <Card className="bg-slate-50 border-0" data-testid="spot-details-card">
+                <Card className={`bg-slate-50 border-0 ${selectedSpot.is_promoted ? 'ring-2 ring-purple-400' : ''}`} data-testid="spot-details-card">
                   <CardContent className="p-4">
+                    {selectedSpot.is_promoted && (
+                      <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg mb-3 flex items-center gap-1 w-fit">
+                        <Star className="w-3 h-3 fill-current" />
+                        FEATURED SPOT
+                      </div>
+                    )}
                     <div className="flex items-start gap-3">
-                      <div className="w-12 h-12 rounded-xl bg-[#E67E22] flex items-center justify-center flex-shrink-0">
-                        <MapPin className="w-6 h-6 text-white" />
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${selectedSpot.is_promoted ? 'bg-purple-500' : 'bg-[#E67E22]'}`}>
+                        {selectedSpot.is_promoted ? (
+                          <Star className="w-6 h-6 text-white fill-white" />
+                        ) : (
+                          <MapPin className="w-6 h-6 text-white" />
+                        )}
                       </div>
                       <div>
                         <h3 className="font-semibold text-[#34495E]">{selectedSpot.address}</h3>
