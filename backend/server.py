@@ -152,6 +152,23 @@ class ViolationReport(BaseModel):
     booking_id: str
     reason: str
 
+class PromotionCreate(BaseModel):
+    spot_id: str
+    package: str = Field(..., pattern="^(1_day|3_days|7_days)$")
+    origin_url: str
+
+class PromotionCheckoutResponse(BaseModel):
+    checkout_url: str
+    session_id: str
+    spot_id: str
+
+# Promotion pricing packages
+PROMOTION_PACKAGES = {
+    "1_day": {"days": 1, "price": 5.00, "label": "24 Hours"},
+    "3_days": {"days": 3, "price": 12.00, "label": "3 Days"},
+    "7_days": {"days": 7, "price": 20.00, "label": "7 Days"}
+}
+
 # ==================== HELPER FUNCTIONS ====================
 
 def hash_password(password: str) -> str:
