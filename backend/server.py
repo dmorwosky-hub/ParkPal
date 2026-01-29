@@ -351,9 +351,6 @@ async def get_available_spots(
     
     # Return promoted spots first
     return promoted_spots + active_spots
-        active_spots.append(ParkingSpotResponse(**spot))
-    
-    return active_spots
 
 @api_router.get("/spots/my", response_model=List[ParkingSpotResponse])
 async def get_my_spots(user: dict = Depends(get_current_user)):
