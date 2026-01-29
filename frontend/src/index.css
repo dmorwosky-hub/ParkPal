@@ -175,6 +175,16 @@ h1, h2, h3, h4, h5, h6 {
     animation: status-pulse 2s ease-in-out infinite;
 }
 
+/* Promoted Pin Glow Animation */
+@keyframes promoted-glow {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(155, 89, 182, 0.5), 0 0 10px rgba(155, 89, 182, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 15px rgba(155, 89, 182, 0.8), 0 0 25px rgba(155, 89, 182, 0.5);
+    }
+}
+
 /* Gradient text for hero */
 .gradient-text {
     background: linear-gradient(135deg, #34495E 0%, #E67E22 100%);
