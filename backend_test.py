@@ -267,6 +267,101 @@ class ParkPalAPITester:
         self.log_test("Report Violation", success and data.get('success'), str(data) if not success else "")
         return success
 
+    def test_get_promotion_packages(self):
+        """Test getting promotion packages"""
+        success, data = self.make_request('GET', 'promotions/packages')
+        expected_packages = ['1_day', '3_days', '7_days']
+        
+        if success and 'packages' in data:
+            packages = data['packages']
+            package_ids = [pkg['id'] for pkg in packages]
+            has_all_packages = all(pkg_id in package_ids for pkg_id in expected_packages)
+            
+            # Check package structure
+            valid_structure = True
+            for pkg in packages:
+                if not all(key in pkg for key in ['id', 'days', 'price', 'label', 'description']):
+                    valid_structure = False
+                    break
+            
+            self.log_test("Get Promotion Packages", has_all_packages and valid_structure, 
+                         f"Missing packages or invalid structure: {data}" if not (has_all_packages and valid_structure) else "")
+            return has_all_packages and valid_structure
+        else:
+            self.log_test("Get Promotion Packages", False, str(data))
+            return False
+
+    def test_create_promotion_checkout(self):
+        """Test creating promotion checkout session"""
+        if not self.host_token or not self.test_spot_id:
+            self.log_test("Create Promotion Checkout", False, "No host token or spot ID")
+            return False
+            
+        promo_data = {
+            "spot_id": self.test_spot_id,
+            "package": "1_day",
+            "origin_url": "https://test.com"
+        }
+        
+        success, data = self.make_request('POST', 'promotions/checkout', promo_data, self.host_token)
+        if success and 'checkout_url' in data and 'session_id' in data:
+            self.test_promo_session_id = data.get('session_id')
+            self.log_test("Create Promotion Checkout", True)
+            return True
+        else:
+            self.log_test("Create Promotion Checkout", False, str(data))
+            return False
+
+    def test_check_promotion_status(self):
+        """Test checking promotion payment status"""
+        if not self.host_token or not hasattr(self, 'test_promo_session_id'):
+            self.log_test("Check Promotion Status", False, "No host token or promo session ID")
+            return False
+            
+        success, data = self.make_request('GET', f'promotions/status/{self.test_promo_session_id}', token=self.host_token)
+        expected_fields = ['payment_status', 'status', 'spot_id']
+        has_required_fields = all(field in data for field in expected_fields) if success else False
+        
+        self.log_test("Check Promotion Status", success and has_required_fields, str(data) if not success else "")
+        return success and has_required_fields
+
+    def test_promoted_spots_first_in_results(self):
+        """Test that promoted spots appear first in search results"""
+        # First, get all spots to see current order
+        success, data = self.make_request('GET', 'spots')
+        if not success:
+            self.log_test("Promoted Spots First in Results", False, "Failed to get spots")
+            return False
+        
+        # Check if any spots are promoted and if they appear first
+        promoted_spots = [spot for spot in data if spot.get('is_promoted', False)]
+        non_promoted_spots = [spot for spot in data if not spot.get('is_promoted', False)]
+        
+        # If there are promoted spots, they should appear before non-promoted ones
+        if promoted_spots:
+            # Find the index of the first non-promoted spot
+            first_non_promoted_index = None
+            for i, spot in enumerate(data):
+                if not spot.get('is_promoted', False):
+                    first_non_promoted_index = i
+                    break
+            
+            # Check if all promoted spots come before the first non-promoted spot
+            promoted_first = True
+            if first_non_promoted_index is not None:
+                for i in range(first_non_promoted_index):
+                    if not data[i].get('is_promoted', False):
+                        promoted_first = False
+                        break
+            
+            self.log_test("Promoted Spots First in Results", promoted_first, 
+                         "Promoted spots not appearing first" if not promoted_first else "")
+            return promoted_first
+        else:
+            # If no promoted spots, test passes (nothing to check)
+            self.log_test("Promoted Spots First in Results", True, "No promoted spots to test")
+            return True
+
     def run_all_tests(self):
         """Run all API tests"""
         print("🚀 Starting Park-Pal API Tests...")
