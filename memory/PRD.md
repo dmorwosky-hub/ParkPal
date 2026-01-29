@@ -6,7 +6,7 @@ A hyper-local, peer-to-peer parking marketplace that allows homeowners (Hosts) t
 ## Architecture
 - **Frontend**: React 19 + Tailwind CSS + Shadcn/UI + Leaflet Maps
 - **Backend**: FastAPI + MongoDB + JWT Auth
-- **Payments**: Stripe via emergentintegrations library (85/15 split)
+- **Payments**: Stripe via emergentintegrations library (85/15 split for bookings)
 - **Real-time**: MongoDB polling (30s intervals)
 
 ## User Personas
@@ -15,6 +15,7 @@ A hyper-local, peer-to-peer parking marketplace that allows homeowners (Hosts) t
 - Wants to monetize unused driveway space
 - Needs simple controls to activate/deactivate availability
 - Requires visibility into who's parking and when
+- **NEW**: Can promote spots for increased visibility
 
 ### Guest (Driver)
 - Looking for convenient, affordable parking near events/busy areas
@@ -38,6 +39,7 @@ A hyper-local, peer-to-peer parking marketplace that allows homeowners (Hosts) t
 - [x] Guest: Stripe payment integration
 - [x] Guest: Get directions to spot
 - [x] Notification system
+- [x] **NEW: Promote Your Spot feature**
 
 ### Should Have (P1)
 - [ ] Guest booking history view
@@ -53,33 +55,35 @@ A hyper-local, peer-to-peer parking marketplace that allows homeowners (Hosts) t
 
 ## What's Been Implemented (December 2024)
 
-### Backend API Endpoints
-- `/api/auth/register` - User registration
-- `/api/auth/login` - User login
-- `/api/auth/me` - Get current user
-- `/api/spots` - CRUD for parking spots
-- `/api/spots/{id}/toggle` - Toggle spot active status
-- `/api/bookings/checkout` - Create Stripe checkout
-- `/api/bookings/status/{session_id}` - Check payment status
-- `/api/bookings/my` - Get user's bookings
-- `/api/bookings/active/host` - Get host's active bookings
-- `/api/notifications` - Get/update notifications
-- `/api/violations/report` - Report parking violation
-- `/api/webhook/stripe` - Stripe webhook handler
+### Phase 1: Core MVP
+- User authentication (register/login)
+- Parking spot CRUD operations
+- Booking flow with Stripe payments
+- Notification system
+- Violation reporting
 
-### Frontend Pages
-- Landing page with hero and features
-- Login/Register with role selection
-- Guest Dashboard with Leaflet map
-- Host Dashboard with spot management
-- Add Spot page with location picker
-- Booking Success page
+### Phase 2: Promote Your Spot Feature (NEW)
+- **Promotion Packages**:
+  - 24 Hours: $5
+  - 3 Days: $12
+  - 7 Days: $20
+- **Backend Endpoints**:
+  - GET `/api/promotions/packages` - List available packages
+  - POST `/api/promotions/checkout` - Create Stripe checkout
+  - GET `/api/promotions/status/{session_id}` - Check payment status
+- **Frontend Features**:
+  - Host Dashboard shows "Promoted" stat card
+  - "Promote This Spot" button on each spot card
+  - Promotion dialog with package selection
+  - Purple star badge on promoted spots
+  - Promoted spots appear first in search results
+  - Glowing purple markers on map for promoted spots
 
 ### Database Collections
 - `users` - User accounts
-- `parking_spots` - Parking spot listings
+- `parking_spots` - Parking spot listings (with is_promoted, promotion_expires)
 - `bookings` - Booking records
-- `payment_transactions` - Stripe transactions
+- `payment_transactions` - Stripe transactions (now includes promotion type)
 - `notifications` - User notifications
 - `violations` - Violation reports
 
