@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import { Button } from '../components/ui/button';
@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Textarea } from '../components/ui/textarea';
 import { 
   Car, MapPin, Plus, DollarSign, Clock, Power, AlertTriangle,
-  LogOut, Bell, X, ChevronRight, Loader2, Timer, Edit2, Check
+  LogOut, Bell, X, Loader2, Timer, Edit2, Check, Sparkles, Star, Zap
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -23,13 +23,13 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const HostDashboard = () => {
   const { user, logout, getAuthHeaders } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [spots, setSpots] = useState([]);
   const [activeBookings, setActiveBookings] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showNotifications, setShowNotifications] = useState(false);
   
-  const [selectedSpot, setSelectedSpot] = useState(null);
   const [editingSpot, setEditingSpot] = useState(null);
   const [autoOffHours, setAutoOffHours] = useState('');
   
@@ -37,6 +37,13 @@ const HostDashboard = () => {
   const [violationBooking, setViolationBooking] = useState(null);
   const [violationReason, setViolationReason] = useState('');
   const [violationLoading, setViolationLoading] = useState(false);
+
+  // Promotion state
+  const [promoDialog, setPromoDialog] = useState(false);
+  const [promoSpot, setPromoSpot] = useState(null);
+  const [promoPackage, setPromoPackage] = useState('');
+  const [promoPackages, setPromoPackages] = useState([]);
+  const [promoLoading, setPromoLoading] = useState(false);
 
   const fetchSpots = useCallback(async () => {
     try {
@@ -65,10 +72,40 @@ const HostDashboard = () => {
     }
   }, [getAuthHeaders]);
 
+  const fetchPromoPackages = useCallback(async () => {
+    try {
+      const response = await axios.get(`${API}/promotions/packages`);
+      setPromoPackages(response.data.packages);
+    } catch (error) {
+      console.error('Error fetching promo packages:', error);
+    }
+  }, []);
+
+  // Check for promotion success
+  useEffect(() => {
+    const promoSuccess = searchParams.get('promo_success');
+    const sessionId = searchParams.get('session_id');
+    
+    if (promoSuccess === 'true' && sessionId) {
+      const checkPromoStatus = async () => {
+        try {
+          await axios.get(`${API}/promotions/status/${sessionId}`, getAuthHeaders());
+          toast.success('Your spot is now promoted!');
+          fetchSpots();
+          // Clear URL params
+          navigate('/host/dashboard', { replace: true });
+        } catch (error) {
+          console.error('Error checking promo status:', error);
+        }
+      };
+      checkPromoStatus();
+    }
+  }, [searchParams, getAuthHeaders, navigate, fetchSpots]);
+
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
-      await Promise.all([fetchSpots(), fetchActiveBookings(), fetchNotifications()]);
+      await Promise.all([fetchSpots(), fetchActiveBookings(), fetchNotifications(), fetchPromoPackages()]);
       setLoading(false);
     };
     loadData();
@@ -79,7 +116,7 @@ const HostDashboard = () => {
     }, 30000);
     
     return () => clearInterval(interval);
-  }, [fetchSpots, fetchActiveBookings, fetchNotifications]);
+  }, [fetchSpots, fetchActiveBookings, fetchNotifications, fetchPromoPackages]);
 
   const handleLogout = () => {
     logout();
@@ -161,6 +198,28 @@ const HostDashboard = () => {
     }
   };
 
+  const handlePromoteSpot = async () => {
+    if (!promoSpot || !promoPackage) return;
+    
+    setPromoLoading(true);
+    try {
+      const response = await axios.post(
+        `${API}/promotions/checkout`,
+        {
+          spot_id: promoSpot.id,
+          package: promoPackage,
+          origin_url: window.location.origin
+        },
+        getAuthHeaders()
+      );
+      // Redirect to Stripe checkout
+      window.location.href = response.data.checkout_url;
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to start promotion');
+      setPromoLoading(false);
+    }
+  };
+
   const getRemainingTime = (endTime) => {
     if (!endTime) return null;
     const end = new Date(endTime);
@@ -171,6 +230,19 @@ const HostDashboard = () => {
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
     return `${hours}h ${minutes}m remaining`;
+  };
+
+  const getPromoTimeLeft = (expires) => {
+    if (!expires) return null;
+    const end = new Date(expires);
+    const now = new Date();
+    const diff = end - now;
+    if (diff <= 0) return 'Expired';
+    
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    if (days > 0) return `${days}d ${hours}h left`;
+    return `${hours}h left`;
   };
 
   const unreadCount = notifications.filter(n => !n.is_read).length;
@@ -300,11 +372,13 @@ const HostDashboard = () => {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-500">Active Bookings</p>
-                  <p className="text-2xl font-bold text-[#E67E22]">{activeBookings.length}</p>
+                  <p className="text-sm text-slate-500">Promoted</p>
+                  <p className="text-2xl font-bold text-[#9B59B6]">
+                    {spots.filter(s => s.is_promoted).length}
+                  </p>
                 </div>
-                <div className="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center">
-                  <Car className="w-6 h-6 text-[#E67E22]" />
+                <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center">
+                  <Sparkles className="w-6 h-6 text-[#9B59B6]" />
                 </div>
               </div>
             </CardContent>
@@ -343,8 +417,16 @@ const HostDashboard = () => {
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
               {spots.map(spot => (
-                <Card key={spot.id} className="bg-white border-0 shadow-sm card-hover overflow-hidden" data-testid={`host-spot-${spot.id}`}>
+                <Card key={spot.id} className={`bg-white border-0 shadow-sm card-hover overflow-hidden ${spot.is_promoted ? 'ring-2 ring-purple-400' : ''}`} data-testid={`host-spot-${spot.id}`}>
                   <CardContent className="p-0">
+                    {/* Promoted Badge */}
+                    {spot.is_promoted && (
+                      <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-bold px-3 py-1.5 flex items-center justify-center gap-1">
+                        <Star className="w-3 h-3 fill-current" />
+                        PROMOTED • {getPromoTimeLeft(spot.promotion_expires)}
+                      </div>
+                    )}
+                    
                     <div className="p-4 border-b border-slate-100">
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center gap-3">
@@ -469,6 +551,26 @@ const HostDashboard = () => {
                         </div>
                       </div>
                     )}
+
+                    {/* Promote Button */}
+                    <div className="p-4 border-t border-slate-100">
+                      <Button
+                        onClick={() => {
+                          setPromoSpot(spot);
+                          setPromoPackage('');
+                          setPromoDialog(true);
+                        }}
+                        variant={spot.is_promoted ? "outline" : "default"}
+                        className={`w-full ${spot.is_promoted 
+                          ? 'border-purple-400 text-purple-600 hover:bg-purple-50' 
+                          : 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white'
+                        }`}
+                        data-testid={`promote-spot-${spot.id}`}
+                      >
+                        <Zap className="w-4 h-4 mr-2" />
+                        {spot.is_promoted ? 'Extend Promotion' : 'Promote This Spot'}
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               ))}
@@ -593,6 +695,84 @@ const HostDashboard = () => {
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 'Submit Report'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Promotion Dialog */}
+      <Dialog open={promoDialog} onOpenChange={setPromoDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2" style={{ fontFamily: 'Montserrat' }}>
+              <Sparkles className="w-5 h-5 text-purple-500" />
+              Promote Your Spot
+            </DialogTitle>
+            <DialogDescription>
+              Featured spots appear first in search results and on the map with a special badge.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {promoSpot && (
+            <div className="space-y-4">
+              <div className="bg-slate-50 rounded-lg p-3">
+                <p className="font-semibold text-[#34495E]">{promoSpot.address}</p>
+                <p className="text-sm text-slate-500">{promoSpot.city}, {promoSpot.state}</p>
+              </div>
+              
+              <div className="space-y-3">
+                <Label>Select Promotion Package</Label>
+                {promoPackages.map(pkg => (
+                  <button
+                    key={pkg.id}
+                    type="button"
+                    onClick={() => setPromoPackage(pkg.id)}
+                    className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
+                      promoPackage === pkg.id 
+                        ? 'border-purple-500 bg-purple-50' 
+                        : 'border-slate-200 hover:border-slate-300'
+                    }`}
+                    data-testid={`promo-package-${pkg.id}`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-semibold text-[#34495E]">{pkg.label}</p>
+                        <p className="text-sm text-slate-500">{pkg.description}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xl font-bold text-purple-600">${pkg.price.toFixed(2)}</p>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setPromoDialog(false);
+                setPromoPackage('');
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handlePromoteSpot}
+              disabled={!promoPackage || promoLoading}
+              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white"
+              data-testid="confirm-promotion-btn"
+            >
+              {promoLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <>
+                  <Zap className="w-4 h-4 mr-2" />
+                  Promote Now
+                </>
               )}
             </Button>
           </DialogFooter>
