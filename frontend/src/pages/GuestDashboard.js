@@ -472,15 +472,24 @@ const GuestDashboard = () => {
                   filteredSpots.map(spot => (
                     <Card
                       key={spot.id}
-                      className="bg-white border border-slate-100 cursor-pointer card-hover"
+                      className={`bg-white border cursor-pointer card-hover ${spot.is_promoted ? 'border-purple-300 ring-1 ring-purple-200' : 'border-slate-100'}`}
                       onClick={() => handleSpotClick(spot)}
                       data-testid={`spot-card-${spot.id}`}
                     >
                       <CardContent className="p-4">
+                        {spot.is_promoted && (
+                          <div className="flex items-center gap-1 text-purple-600 text-xs font-bold mb-2">
+                            <Star className="w-3 h-3 fill-current" /> FEATURED
+                          </div>
+                        )}
                         <div className="flex items-start justify-between">
                           <div className="flex items-start gap-3">
-                            <div className="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center flex-shrink-0">
-                              <MapPin className="w-5 h-5 text-[#E67E22]" />
+                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${spot.is_promoted ? 'bg-purple-100' : 'bg-orange-100'}`}>
+                              {spot.is_promoted ? (
+                                <Star className="w-5 h-5 text-purple-500 fill-purple-500" />
+                              ) : (
+                                <MapPin className="w-5 h-5 text-[#E67E22]" />
+                              )}
                             </div>
                             <div>
                               <h3 className="font-medium text-[#34495E] text-sm">{spot.address}</h3>
@@ -488,7 +497,7 @@ const GuestDashboard = () => {
                             </div>
                           </div>
                           <div className="text-right">
-                            <p className="font-bold text-[#E67E22]">${spot.hourly_rate}/hr</p>
+                            <p className={`font-bold ${spot.is_promoted ? 'text-purple-600' : 'text-[#E67E22]'}`}>${spot.hourly_rate}/hr</p>
                             {spot.event_rate && (
                               <p className="text-xs text-slate-500">${spot.event_rate} event</p>
                             )}
