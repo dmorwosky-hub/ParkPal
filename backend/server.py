@@ -314,13 +314,15 @@ async def get_available_spots(
     if max_price:
         query["hourly_rate"] = {"$lte": max_price}
     
-    # Check auto-off times
+    # Check auto-off times and promotion expiry
     now = datetime.now(timezone.utc)
     spots = await db.parking_spots.find(query, {"_id": 0}).to_list(100)
     
-    # Filter out spots past auto-off time
+    # Filter out spots past auto-off time and check promotions
     active_spots = []
+    promoted_spots = []
     for spot in spots:
+        # Check auto-off
         if spot.get("auto_off_time"):
             auto_off = datetime.fromisoformat(spot["auto_off_time"])
             if now >= auto_off:
@@ -329,6 +331,26 @@ async def get_available_spots(
                     {"$set": {"is_active": False, "auto_off_time": None}}
                 )
                 continue
+        
+        # Check promotion expiry
+        if spot.get("is_promoted") and spot.get("promotion_expires"):
+            promo_expires = datetime.fromisoformat(spot["promotion_expires"])
+            if now >= promo_expires:
+                await db.parking_spots.update_one(
+                    {"id": spot["id"]},
+                    {"$set": {"is_promoted": False, "promotion_expires": None}}
+                )
+                spot["is_promoted"] = False
+                spot["promotion_expires"] = None
+        
+        spot_response = ParkingSpotResponse(**spot)
+        if spot.get("is_promoted"):
+            promoted_spots.append(spot_response)
+        else:
+            active_spots.append(spot_response)
+    
+    # Return promoted spots first
+    return promoted_spots + active_spots
         active_spots.append(ParkingSpotResponse(**spot))
     
     return active_spots
