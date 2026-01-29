@@ -313,13 +313,18 @@ const GuestDashboard = () => {
                 <Marker
                   key={spot.id}
                   position={[spot.latitude, spot.longitude]}
-                  icon={createMarkerIcon(selectedSpot?.id === spot.id)}
+                  icon={createMarkerIcon(selectedSpot?.id === spot.id, spot.is_promoted)}
                   eventHandlers={{
                     click: () => handleSpotClick(spot)
                   }}
                 >
                   <Popup>
                     <div className="p-2">
+                      {spot.is_promoted && (
+                        <div className="flex items-center gap-1 text-purple-600 text-xs font-bold mb-1">
+                          <Star className="w-3 h-3 fill-current" /> FEATURED
+                        </div>
+                      )}
                       <p className="font-semibold text-[#34495E]">{spot.address}</p>
                       <p className="text-[#E67E22] font-bold">${spot.hourly_rate}/hr</p>
                     </div>
