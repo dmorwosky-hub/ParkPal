@@ -666,6 +666,151 @@ async def report_violation(report: ViolationReport, user: dict = Depends(get_cur
     
     return {"success": True, "violation_id": violation_doc["id"]}
 
+# ==================== PROMOTION ENDPOINTS ====================
+
+@api_router.get("/promotions/packages")
+async def get_promotion_packages():
+    """Get available promotion packages"""
+    return {
+        "packages": [
+            {"id": "1_day", "days": 1, "price": 5.00, "label": "24 Hours", "description": "Perfect for single events"},
+            {"id": "3_days", "days": 3, "price": 12.00, "label": "3 Days", "description": "Great for weekend events"},
+            {"id": "7_days", "days": 7, "price": 20.00, "label": "7 Days", "description": "Best value for busy weeks"}
+        ]
+    }
+
+@api_router.post("/promotions/checkout", response_model=PromotionCheckoutResponse)
+async def create_promotion_checkout(
+    promo_data: PromotionCreate,
+    request: Request,
+    user: dict = Depends(get_current_user)
+):
+    if user["role"] != "host":
+        raise HTTPException(status_code=403, detail="Only hosts can promote spots")
+    
+    spot = await db.parking_spots.find_one({"id": promo_data.spot_id}, {"_id": 0})
+    if not spot:
+        raise HTTPException(status_code=404, detail="Spot not found")
+    if spot["host_id"] != user["id"]:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    if promo_data.package not in PROMOTION_PACKAGES:
+        raise HTTPException(status_code=400, detail="Invalid promotion package")
+    
+    package = PROMOTION_PACKAGES[promo_data.package]
+    amount = package["price"]
+    
+    # Create Stripe checkout session
+    host_url = str(request.base_url).rstrip('/')
+    webhook_url = f"{host_url}/api/webhook/stripe"
+    stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY, webhook_url=webhook_url)
+    
+    origin_url = promo_data.origin_url.rstrip('/')
+    success_url = f"{origin_url}/host/dashboard?promo_success=true&session_id={{CHECKOUT_SESSION_ID}}"
+    cancel_url = f"{origin_url}/host/dashboard"
+    
+    checkout_request = CheckoutSessionRequest(
+        amount=amount,
+        currency="usd",
+        success_url=success_url,
+        cancel_url=cancel_url,
+        metadata={
+            "spot_id": promo_data.spot_id,
+            "host_id": user["id"],
+            "package": promo_data.package,
+            "days": str(package["days"]),
+            "type": "spot_promotion"
+        }
+    )
+    
+    session = await stripe_checkout.create_checkout_session(checkout_request)
+    
+    # Create payment transaction record
+    transaction_doc = {
+        "id": str(uuid.uuid4()),
+        "session_id": session.session_id,
+        "spot_id": promo_data.spot_id,
+        "user_id": user["id"],
+        "amount": amount,
+        "currency": "usd",
+        "payment_status": "initiated",
+        "type": "promotion",
+        "metadata": checkout_request.metadata,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.payment_transactions.insert_one(transaction_doc)
+    
+    return PromotionCheckoutResponse(
+        checkout_url=session.url,
+        session_id=session.session_id,
+        spot_id=promo_data.spot_id
+    )
+
+@api_router.get("/promotions/status/{session_id}")
+async def check_promotion_status(session_id: str, request: Request, user: dict = Depends(get_current_user)):
+    host_url = str(request.base_url).rstrip('/')
+    webhook_url = f"{host_url}/api/webhook/stripe"
+    stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY, webhook_url=webhook_url)
+    
+    status = await stripe_checkout.get_checkout_status(session_id)
+    
+    # Find transaction
+    transaction = await db.payment_transactions.find_one(
+        {"session_id": session_id, "type": "promotion"},
+        {"_id": 0}
+    )
+    if not transaction:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+    
+    # Update transaction status
+    await db.payment_transactions.update_one(
+        {"session_id": session_id},
+        {"$set": {
+            "payment_status": status.payment_status,
+            "status": status.status,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    if status.payment_status == "paid":
+        # Check if already processed
+        spot = await db.parking_spots.find_one({"id": transaction["spot_id"]}, {"_id": 0})
+        
+        # Calculate promotion expiry
+        days = int(transaction["metadata"].get("days", 1))
+        
+        # If already promoted, extend the promotion
+        if spot.get("is_promoted") and spot.get("promotion_expires"):
+            current_expires = datetime.fromisoformat(spot["promotion_expires"])
+            if current_expires > datetime.now(timezone.utc):
+                new_expires = current_expires + timedelta(days=days)
+            else:
+                new_expires = datetime.now(timezone.utc) + timedelta(days=days)
+        else:
+            new_expires = datetime.now(timezone.utc) + timedelta(days=days)
+        
+        await db.parking_spots.update_one(
+            {"id": transaction["spot_id"]},
+            {"$set": {
+                "is_promoted": True,
+                "promotion_expires": new_expires.isoformat()
+            }}
+        )
+        
+        # Notify host
+        await create_notification(
+            user["id"],
+            "Spot Promoted!",
+            f"Your spot at {spot['address']} is now featured for {days} day(s)!",
+            "promotion"
+        )
+    
+    return {
+        "payment_status": status.payment_status,
+        "status": status.status,
+        "spot_id": transaction["spot_id"]
+    }
+
 # ==================== STRIPE WEBHOOK ====================
 
 @api_router.post("/webhook/stripe")
