@@ -209,6 +209,14 @@ const LandingPage = () => {
                 Park-Pal
               </span>
             </div>
+            <div className="flex items-center gap-6">
+              <Link to="/terms" className="text-sm text-slate-500 hover:text-[#E67E22] transition-colors" data-testid="footer-terms-link">
+                Terms of Service
+              </Link>
+              <Link to="/privacy" className="text-sm text-slate-500 hover:text-[#E67E22] transition-colors" data-testid="footer-privacy-link">
+                Privacy Policy
+              </Link>
+            </div>
             <p className="text-slate-500 text-sm">
               © {new Date().getFullYear()} Park-Pal. All rights reserved.
             </p>

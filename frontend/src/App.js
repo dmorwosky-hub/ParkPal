@@ -9,6 +9,8 @@ import HostDashboard from "./pages/HostDashboard";
 import BookingSuccess from "./pages/BookingSuccess";
 import BookingHistoryPage from "./pages/BookingHistoryPage";
 import AddSpotPage from "./pages/AddSpotPage";
+import TermsPage from "./pages/TermsPage";
+import PrivacyPage from "./pages/PrivacyPage";
 import "./App.css";
 
 const ProtectedRoute = ({ children, allowedRole }) => {
@@ -98,6 +100,8 @@ function App() {
               </ProtectedRoute>
             } 
           />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
