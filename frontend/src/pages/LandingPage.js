@@ -210,7 +210,7 @@ const LandingPage = () => {
               </span>
             </div>
             <p className="text-slate-500 text-sm">
-              © 2024 Park-Pal. All rights reserved.
+              © {new Date().getFullYear()} Park-Pal. All rights reserved.
             </p>
           </div>
         </div>

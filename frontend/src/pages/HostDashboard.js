@@ -13,10 +13,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Textarea } from '../components/ui/textarea';
 import { 
   Car, MapPin, Plus, DollarSign, Clock, Power, AlertTriangle,
-  LogOut, Bell, X, Loader2, Timer, Edit2, Check, Sparkles, Star, Zap
+  LogOut, Bell, X, Loader2, Timer, Edit2, Check, Sparkles, Star, Zap,
+  TrendingUp, Trash2
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -44,6 +46,9 @@ const HostDashboard = () => {
   const [promoPackage, setPromoPackage] = useState('');
   const [promoPackages, setPromoPackages] = useState([]);
   const [promoLoading, setPromoLoading] = useState(false);
+
+  // Earnings state
+  const [earnings, setEarnings] = useState(null);
 
   const fetchSpots = useCallback(async () => {
     try {
@@ -81,6 +86,15 @@ const HostDashboard = () => {
     }
   }, []);
 
+  const fetchEarnings = useCallback(async () => {
+    try {
+      const response = await axios.get(`${API}/stats/host`, getAuthHeaders());
+      setEarnings(response.data);
+    } catch (error) {
+      console.error('Error fetching earnings:', error);
+    }
+  }, [getAuthHeaders]);
+
   // Check for promotion success
   useEffect(() => {
     const promoSuccess = searchParams.get('promo_success');
@@ -105,7 +119,7 @@ const HostDashboard = () => {
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
-      await Promise.all([fetchSpots(), fetchActiveBookings(), fetchNotifications(), fetchPromoPackages()]);
+      await Promise.all([fetchSpots(), fetchActiveBookings(), fetchNotifications(), fetchPromoPackages(), fetchEarnings()]);
       setLoading(false);
     };
     loadData();
@@ -116,7 +130,7 @@ const HostDashboard = () => {
     }, 30000);
     
     return () => clearInterval(interval);
-  }, [fetchSpots, fetchActiveBookings, fetchNotifications, fetchPromoPackages]);
+  }, [fetchSpots, fetchActiveBookings, fetchNotifications, fetchPromoPackages, fetchEarnings]);
 
   const handleLogout = () => {
     logout();
@@ -217,6 +231,17 @@ const HostDashboard = () => {
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Failed to start promotion');
       setPromoLoading(false);
+    }
+  };
+
+  const handleDeleteSpot = async (spotId) => {
+    if (!window.confirm('Are you sure you want to delete this spot?')) return;
+    try {
+      await axios.delete(`${API}/spots/${spotId}`, getAuthHeaders());
+      setSpots(prev => prev.filter(s => s.id !== spotId));
+      toast.success('Spot deleted');
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to delete spot');
     }
   };
 
@@ -339,7 +364,7 @@ const HostDashboard = () => {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 py-6">
         {/* Quick Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
           <Card className="bg-white border-0 shadow-sm">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
@@ -372,6 +397,21 @@ const HostDashboard = () => {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
+                  <p className="text-sm text-slate-500">Earnings</p>
+                  <p className="text-2xl font-bold text-[#E67E22]">
+                    ${earnings?.total_earnings?.toFixed(2) || '0.00'}
+                  </p>
+                </div>
+                <div className="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center">
+                  <TrendingUp className="w-6 h-6 text-[#E67E22]" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-white border-0 shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
                   <p className="text-sm text-slate-500">Promoted</p>
                   <p className="text-2xl font-bold text-[#9B59B6]">
                     {spots.filter(s => s.is_promoted).length}
@@ -394,6 +434,54 @@ const HostDashboard = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Earnings Chart */}
+        {earnings && earnings.monthly_earnings && earnings.monthly_earnings.length > 0 && (
+          <section className="mb-8">
+            <Card className="bg-white border-0 shadow-sm">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-bold text-[#34495E]" style={{ fontFamily: 'Montserrat' }}>
+                    Monthly Earnings
+                  </h2>
+                  <div className="flex items-center gap-4 text-sm">
+                    <span className="text-slate-500">
+                      {earnings.total_bookings} bookings total
+                    </span>
+                  </div>
+                </div>
+                <div className="h-48">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={earnings.monthly_earnings}>
+                      <XAxis
+                        dataKey="month"
+                        tick={{ fill: '#94a3b8', fontSize: 12 }}
+                        axisLine={false}
+                        tickLine={false}
+                      />
+                      <YAxis
+                        tick={{ fill: '#94a3b8', fontSize: 12 }}
+                        axisLine={false}
+                        tickLine={false}
+                        tickFormatter={(v) => `$${v}`}
+                      />
+                      <Tooltip
+                        formatter={(value) => [`$${value.toFixed(2)}`, 'Earnings']}
+                        contentStyle={{
+                          borderRadius: '12px',
+                          border: 'none',
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                          fontSize: '13px'
+                        }}
+                      />
+                      <Bar dataKey="earnings" fill="#E67E22" radius={[6, 6, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          </section>
+        )}
 
         {/* My Spots */}
         <section className="mb-8">
@@ -508,6 +596,14 @@ const HostDashboard = () => {
                             data-testid={`edit-spot-${spot.id}`}
                           >
                             <Edit2 className="w-4 h-4 text-slate-400" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteSpot(spot.id)}
+                            data-testid={`delete-spot-${spot.id}`}
+                          >
+                            <Trash2 className="w-4 h-4 text-slate-400 hover:text-[#C0392B]" />
                           </Button>
                         </div>
                       )}

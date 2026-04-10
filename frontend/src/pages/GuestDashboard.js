@@ -13,7 +13,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { 
   Car, MapPin, Search, Filter, DollarSign, Clock, Navigation, 
-  LogOut, Bell, X, ChevronRight, Loader2, Star
+  LogOut, Bell, X, ChevronRight, Loader2, Star, History
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -221,7 +221,26 @@ const GuestDashboard = () => {
           </span>
         </div>
         
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="hidden sm:flex items-center gap-1.5 text-[#34495E] hover:bg-slate-100 rounded-full"
+            onClick={() => navigate('/guest/bookings')}
+            data-testid="my-bookings-btn"
+          >
+            <History className="w-4 h-4" />
+            My Bookings
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="sm:hidden"
+            onClick={() => navigate('/guest/bookings')}
+            data-testid="my-bookings-btn-mobile"
+          >
+            <History className="w-5 h-5 text-[#34495E]" />
+          </Button>
           <Button
             variant="ghost"
             size="icon"

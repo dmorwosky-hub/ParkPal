@@ -7,6 +7,7 @@ import RegisterPage from "./pages/RegisterPage";
 import GuestDashboard from "./pages/GuestDashboard";
 import HostDashboard from "./pages/HostDashboard";
 import BookingSuccess from "./pages/BookingSuccess";
+import BookingHistoryPage from "./pages/BookingHistoryPage";
 import AddSpotPage from "./pages/AddSpotPage";
 import "./App.css";
 
@@ -62,6 +63,14 @@ function App() {
             element={
               <ProtectedRoute allowedRole="guest">
                 <GuestDashboard />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/guest/bookings" 
+            element={
+              <ProtectedRoute allowedRole="guest">
+                <BookingHistoryPage />
               </ProtectedRoute>
             } 
           />
