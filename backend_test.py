@@ -7,7 +7,7 @@ from datetime import datetime
 import time
 
 class ParkPalAPITester:
-    def __init__(self, base_url="https://spotmate-9.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://parkpal-staging.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.host_token = None
         self.guest_token = None
