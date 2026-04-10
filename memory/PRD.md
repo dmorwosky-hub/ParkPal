@@ -99,8 +99,10 @@ backend/
 - **Guest Stats API** (total spent, hours parked, booking count)
 - **Delete Spot** functionality for hosts
 - **My Bookings** navigation in guest header
+- **Trust & Safety pages**: Terms of Service (`/terms`) and Privacy Policy (`/privacy`)
 - Copyright year dynamic
 - All tests passing (22/22 backend, 100% frontend)
+- Deployment validated and production-ready
 
 ### Database Collections
 - `users` - User accounts
