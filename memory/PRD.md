@@ -100,6 +100,13 @@ backend/
 - **Delete Spot** functionality for hosts
 - **My Bookings** navigation in guest header
 - **Trust & Safety pages**: Terms of Service (`/terms`) and Privacy Policy (`/privacy`)
+- **Custom 404 page** with branded "Spot Not Found" message
+- **Demo data seeder** (`seed_demo.py`) — 6 spots, 3 bookings, 2 demo users
+- **SEO meta tags** (Open Graph, Twitter Cards, keywords)
+- **FAQ section** on landing page (6 questions)
+- **Stats bar** on landing page (85% payout, 2-tap checkout, etc.)
+- **Professional README.md** for Flippa buyers
+- **N+1 query fix** in booking history (batched spot lookups)
 - Copyright year dynamic
 - All tests passing (22/22 backend, 100% frontend)
 - Deployment validated and production-ready

@@ -192,10 +192,14 @@ async def get_booking_history(user: dict = Depends(get_current_user)):
             {"_id": 0}
         ).sort("created_at", -1).to_list(100)
 
-    # Enrich with spot details
+    # Enrich with spot details (batched query to avoid N+1)
+    spot_ids = list(set(b.get("spot_id") for b in bookings if b.get("spot_id")))
+    spots_list = await db.parking_spots.find({"id": {"$in": spot_ids}}, {"_id": 0}).to_list(100)
+    spots_dict = {s["id"]: s for s in spots_list}
+
     result = []
     for b in bookings:
-        spot = await db.parking_spots.find_one({"id": b.get("spot_id")}, {"_id": 0})
+        spot = spots_dict.get(b.get("spot_id"))
         item = {k: v for k, v in b.items() if k in BookingHistoryItem.model_fields}
         if spot:
             item["spot_address"] = spot.get("address")
