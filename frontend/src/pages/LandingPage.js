@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/button';
-import { Car, MapPin, DollarSign, Clock, Shield, ChevronRight } from 'lucide-react';
+import { Car, MapPin, DollarSign, Clock, Shield, ChevronRight, HelpCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const LandingPage = () => {
@@ -193,6 +193,92 @@ const LandingPage = () => {
                 />
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Stats Bar */}
+      <section className="py-12 px-4 sm:px-6 lg:px-8 bg-[#ECF0F1]">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+            {[
+              { value: '85%', label: 'Host Payout Rate' },
+              { value: '2-Tap', label: 'Quick Checkout' },
+              { value: '24/7', label: 'Always Available' },
+              { value: '$0', label: 'Free to List' }
+            ].map((stat, index) => (
+              <motion.div
+                key={stat.label}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <p className="text-3xl sm:text-4xl font-bold text-[#E67E22]" style={{ fontFamily: 'Montserrat' }}>
+                  {stat.value}
+                </p>
+                <p className="text-sm text-slate-600 mt-1">{stat.label}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl font-bold text-[#34495E] tracking-tight" style={{ fontFamily: 'Montserrat' }}>
+              Frequently Asked Questions
+            </h2>
+          </div>
+          <div className="space-y-4">
+            {[
+              {
+                q: 'How does pricing work?',
+                a: 'Hosts set their own hourly and event rates. When a Guest books, the Platform takes a 15% service fee and the Host receives 85% of the booking amount.'
+              },
+              {
+                q: 'Is my vehicle safe?',
+                a: 'All bookings include vehicle details that Hosts verify. Hosts can report violations for unauthorized vehicles, and our notification system keeps both parties informed throughout the booking.'
+              },
+              {
+                q: 'What if I need to leave early?',
+                a: 'Your booking is for the full duration paid. You are free to leave at any time, but refunds for early departure are handled on a case-by-case basis.'
+              },
+              {
+                q: 'How do Hosts get paid?',
+                a: 'Payments are processed securely via Stripe. Hosts receive 85% of each booking amount after the Guest completes checkout.'
+              },
+              {
+                q: 'Can I list multiple parking spots?',
+                a: 'Absolutely! Hosts can list as many spots as they have available. Each spot can have its own pricing, schedule, and description.'
+              },
+              {
+                q: 'What does "Promote Your Spot" do?',
+                a: 'Promoted spots appear first in search results and get a featured badge on the map. Packages start at just $5 for 24 hours of featured placement.'
+              }
+            ].map((faq, index) => (
+              <motion.details
+                key={index}
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.05 }}
+                className="group bg-[#ECF0F1] rounded-xl overflow-hidden"
+              >
+                <summary className="flex items-center justify-between cursor-pointer p-5 list-none">
+                  <div className="flex items-center gap-3">
+                    <HelpCircle className="w-5 h-5 text-[#E67E22] flex-shrink-0" />
+                    <span className="font-semibold text-[#34495E] text-sm sm:text-base">{faq.q}</span>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-slate-400 transition-transform group-open:rotate-90 flex-shrink-0" />
+                </summary>
+                <div className="px-5 pb-5 pl-13 text-slate-600 text-sm leading-relaxed">
+                  {faq.a}
+                </div>
+              </motion.details>
+            ))}
           </div>
         </div>
       </section>

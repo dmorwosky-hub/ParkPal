@@ -1,6 +1,10 @@
 # Park-Pal Test Credentials
 
-## Test Accounts
+## Demo Accounts (Pre-seeded with data)
+- **Host**: demo.host@parkpal.com / demo123456
+- **Guest**: demo.guest@parkpal.com / demo123456
+
+## Test Accounts (Created during testing)
 - **Host**: testhost@park.com / host123456
 - **Guest**: testguest@park.com / guest123456
 

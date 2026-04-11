@@ -11,6 +11,7 @@ import BookingHistoryPage from "./pages/BookingHistoryPage";
 import AddSpotPage from "./pages/AddSpotPage";
 import TermsPage from "./pages/TermsPage";
 import PrivacyPage from "./pages/PrivacyPage";
+import NotFoundPage from "./pages/NotFoundPage";
 import "./App.css";
 
 const ProtectedRoute = ({ children, allowedRole }) => {
@@ -102,6 +103,7 @@ function App() {
           />
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
