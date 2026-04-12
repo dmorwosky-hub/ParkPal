@@ -1,0 +1,21 @@
+{
+  "short_name": "Park-Pal",
+  "name": "Park-Pal — Peer-to-Peer Parking Marketplace",
+  "icons": [
+    {
+      "src": "favicon.png",
+      "sizes": "798x663",
+      "type": "image/png"
+    },
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64",
+      "type": "image/x-icon"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#E67E22",
+  "background_color": "#ECF0F1",
+  "description": "The peer-to-peer parking marketplace. Rent out your driveway or find affordable parking near events."
+}
