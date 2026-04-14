@@ -1,7 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Toaster } from "sonner";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { registerServiceWorker } from "./swRegister";
 import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
@@ -15,9 +16,14 @@ import PrivacyPage from "./pages/PrivacyPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import "./App.css";
 
-// Force Park-Pal branding (title + favicon)
+// Force Park-Pal branding (title + favicon) + PWA
+let deferredInstallPrompt = null;
+
 function useBranding() {
   useEffect(() => {
+    // Register service worker
+    registerServiceWorker();
+
     const TITLE = "Park-Pal \u2014 Peer-to-Peer Parking Marketplace";
 
     function applyBranding() {
@@ -45,7 +51,6 @@ function useBranding() {
     }
 
     applyBranding();
-    // Re-apply after a delay to beat any async scripts
     const t1 = setTimeout(applyBranding, 500);
     const t2 = setTimeout(applyBranding, 2000);
 
@@ -60,13 +65,81 @@ function useBranding() {
       observer.observe(titleEl, { childList: true });
     }
 
+    // Capture install prompt
+    const handleBeforeInstall = (e) => {
+      e.preventDefault();
+      deferredInstallPrompt = e;
+      window.dispatchEvent(new Event('parkpal-install-ready'));
+    };
+    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
       observer.disconnect();
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
     };
   }, []);
 }
+
+function useInstallPrompt() {
+  const [canInstall, setCanInstall] = useState(false);
+
+  useEffect(() => {
+    if (deferredInstallPrompt) setCanInstall(true);
+    const handler = () => setCanInstall(true);
+    window.addEventListener('parkpal-install-ready', handler);
+    return () => window.removeEventListener('parkpal-install-ready', handler);
+  }, []);
+
+  const install = async () => {
+    if (!deferredInstallPrompt) return;
+    deferredInstallPrompt.prompt();
+    const result = await deferredInstallPrompt.userChoice;
+    if (result.outcome === 'accepted') {
+      setCanInstall(false);
+    }
+    deferredInstallPrompt = null;
+  };
+
+  return { canInstall, install };
+}
+
+const InstallBanner = () => {
+  const { canInstall, install } = useInstallPrompt();
+  const [dismissed, setDismissed] = useState(false);
+
+  if (!canInstall || dismissed) return null;
+
+  return (
+    <div
+      className="fixed bottom-20 left-4 right-4 sm:left-auto sm:right-4 sm:w-80 bg-[#34495E] text-white rounded-2xl shadow-2xl p-4 z-[9998] flex items-center gap-3"
+      data-testid="install-banner"
+    >
+      <img src="/icon-96x96.png" alt="Park-Pal" className="w-12 h-12 rounded-xl" />
+      <div className="flex-1 min-w-0">
+        <p className="font-bold text-sm" style={{ fontFamily: 'Montserrat' }}>Install Park-Pal</p>
+        <p className="text-xs text-slate-300">Add to home screen for the best experience</p>
+      </div>
+      <div className="flex gap-2 flex-shrink-0">
+        <button
+          onClick={() => setDismissed(true)}
+          className="text-xs text-slate-400 hover:text-white px-2 py-1"
+          data-testid="install-dismiss-btn"
+        >
+          Later
+        </button>
+        <button
+          onClick={install}
+          className="bg-[#E67E22] hover:bg-[#D35400] text-white text-xs font-bold px-4 py-2 rounded-full"
+          data-testid="install-accept-btn"
+        >
+          Install
+        </button>
+      </div>
+    </div>
+  );
+};
 
 const ProtectedRoute = ({ children, allowedRole }) => {
   const { user, loading } = useAuth();
@@ -161,6 +234,7 @@ function App() {
           <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
+        <InstallBanner />
       </BrowserRouter>
     </AuthProvider>
   );

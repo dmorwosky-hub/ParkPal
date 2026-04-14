@@ -1,21 +1,22 @@
 {
   "short_name": "Park-Pal",
   "name": "Park-Pal — Peer-to-Peer Parking Marketplace",
+  "description": "Find and book affordable parking near events, or earn money renting out your driveway.",
   "icons": [
-    {
-      "src": "favicon.png",
-      "sizes": "798x663",
-      "type": "image/png"
-    },
-    {
-      "src": "favicon.ico",
-      "sizes": "64x64",
-      "type": "image/x-icon"
-    }
+    { "src": "icon-72x72.png", "sizes": "72x72", "type": "image/png" },
+    { "src": "icon-96x96.png", "sizes": "96x96", "type": "image/png" },
+    { "src": "icon-128x128.png", "sizes": "128x128", "type": "image/png" },
+    { "src": "icon-144x144.png", "sizes": "144x144", "type": "image/png", "purpose": "any" },
+    { "src": "icon-152x152.png", "sizes": "152x152", "type": "image/png" },
+    { "src": "icon-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-384x384.png", "sizes": "384x384", "type": "image/png" },
+    { "src": "icon-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
   ],
-  "start_url": ".",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "theme_color": "#E67E22",
   "background_color": "#ECF0F1",
-  "description": "The peer-to-peer parking marketplace. Rent out your driveway or find affordable parking near events."
+  "categories": ["business", "lifestyle", "navigation"]
 }

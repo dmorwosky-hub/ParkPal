@@ -107,6 +107,13 @@ backend/
 - **Stats bar** on landing page (85% payout, 2-tap checkout, etc.)
 - **Professional README.md** for Flippa buyers
 - **N+1 query fix** in booking history (batched spot lookups)
+- **Custom favicon** with Park-Pal logo (user-provided)
+- **Title override** via React to bypass Emergent script injection
+- **PWA (Progressive Web App)** — installable on mobile/desktop via "Add to Home Screen"
+  - Service worker with network-first caching strategy
+  - Web app manifest with 8 icon sizes (72-512px)
+  - Install prompt banner for mobile users
+  - Apple mobile web app meta tags
 - Copyright year dynamic
 - All tests passing (22/22 backend, 100% frontend)
 - Deployment validated and production-ready
