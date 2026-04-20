@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
@@ -7,7 +7,7 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Textarea } from '../components/ui/textarea';
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { ArrowLeft, MapPin, DollarSign, Loader2, Check } from 'lucide-react';
 import { toast } from 'sonner';
@@ -52,11 +52,20 @@ const LocationPicker = ({ position, setPosition }) => {
   return position ? <Marker position={position} icon={markerIcon} /> : null;
 };
 
+const FlyToLocation = ({ center }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (center) map.flyTo(center, 14, { duration: 1 });
+  }, [center, map]);
+  return null;
+};
+
 const AddSpotPage = () => {
   const { getAuthHeaders } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [position, setPosition] = useState(null);
+  const [mapCenter, setMapCenter] = useState([34.0522, -118.2437]);
   
   const [formData, setFormData] = useState({
     address: '',
@@ -67,6 +76,17 @@ const AddSpotPage = () => {
     event_rate: '',
     description: ''
   });
+
+  // Get user location on mount
+  useEffect(() => {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => setMapCenter([pos.coords.latitude, pos.coords.longitude]),
+        () => {},
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
+      );
+    }
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -131,14 +151,15 @@ const AddSpotPage = () => {
                 </Label>
                 <div className="h-64 rounded-xl overflow-hidden border-2 border-slate-200">
                   <MapContainer
-                    center={[34.0522, -118.2437]}
-                    zoom={10}
+                    center={mapCenter}
+                    zoom={12}
                     className="h-full w-full"
                   >
                     <TileLayer
                       attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                       url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     />
+                    <FlyToLocation center={mapCenter} />
                     <LocationPicker position={position} setPosition={setPosition} />
                   </MapContainer>
                 </div>

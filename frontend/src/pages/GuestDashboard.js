@@ -13,7 +13,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { 
   Car, MapPin, Search, Filter, DollarSign, Clock, Navigation, 
-  LogOut, Bell, X, ChevronRight, Loader2, Star, History
+  LogOut, Bell, X, ChevronRight, Loader2, Star, History, Crosshair
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -73,14 +73,45 @@ const createMarkerIcon = (isSelected = false, isPromoted = false) => {
   });
 };
 
-const MapController = ({ center }) => {
+const MapController = ({ center, zoom }) => {
   const map = useMap();
   useEffect(() => {
     if (center) {
-      map.flyTo(center, 14, { duration: 1 });
+      map.flyTo(center, zoom || 14, { duration: 1 });
     }
-  }, [center, map]);
+  }, [center, zoom, map]);
   return null;
+};
+
+// User location marker
+const createUserLocationIcon = () => {
+  return L.divIcon({
+    className: 'custom-marker-wrapper',
+    html: `
+      <div style="
+        width: 20px;
+        height: 20px;
+        background: #3B82F6;
+        border-radius: 50%;
+        border: 3px solid white;
+        box-shadow: 0 0 0 2px #3B82F6, 0 4px 12px rgba(59, 130, 246, 0.4);
+      "></div>
+      <div style="
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 40px;
+        height: 40px;
+        background: rgba(59, 130, 246, 0.15);
+        border-radius: 50%;
+        z-index: -1;
+        animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      "></div>
+    `,
+    iconSize: [20, 20],
+    iconAnchor: [10, 10],
+  });
 };
 
 const GuestDashboard = () => {
@@ -95,6 +126,9 @@ const GuestDashboard = () => {
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [mapCenter, setMapCenter] = useState([34.0522, -118.2437]); // LA default
+  const [mapZoom, setMapZoom] = useState(12);
+  const [userLocation, setUserLocation] = useState(null);
+  const [locatingUser, setLocatingUser] = useState(false);
   
   const [bookingForm, setBookingForm] = useState({
     licensePlate: '',
@@ -132,9 +166,50 @@ const GuestDashboard = () => {
   useEffect(() => {
     fetchSpots();
     fetchNotifications();
-    const interval = setInterval(fetchSpots, 30000); // Refresh every 30s
+    const interval = setInterval(fetchSpots, 30000);
     return () => clearInterval(interval);
   }, [fetchSpots, fetchNotifications]);
+
+  // Get user's current location on mount
+  useEffect(() => {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const loc = [position.coords.latitude, position.coords.longitude];
+          setUserLocation(loc);
+          setMapCenter(loc);
+          setMapZoom(14);
+        },
+        (error) => {
+          console.log('Geolocation not available:', error.message);
+          // Keep LA default
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
+      );
+    }
+  }, []);
+
+  const handleLocateMe = () => {
+    if (!('geolocation' in navigator)) {
+      toast.error('Geolocation is not supported by your browser');
+      return;
+    }
+    setLocatingUser(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const loc = [position.coords.latitude, position.coords.longitude];
+        setUserLocation(loc);
+        setMapCenter(loc);
+        setMapZoom(15);
+        setLocatingUser(false);
+      },
+      (error) => {
+        toast.error('Could not get your location. Please allow location access.');
+        setLocatingUser(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
 
   const handleLogout = () => {
     logout();
@@ -144,6 +219,7 @@ const GuestDashboard = () => {
   const handleSpotClick = (spot) => {
     setSelectedSpot(spot);
     setMapCenter([spot.latitude, spot.longitude]);
+    setMapZoom(15);
   };
 
   const handleBookNow = () => {
@@ -318,7 +394,7 @@ const GuestDashboard = () => {
           ) : (
             <MapContainer
               center={mapCenter}
-              zoom={12}
+              zoom={mapZoom}
               className="h-full w-full"
               style={{ minHeight: '300px' }}
             >
@@ -326,7 +402,20 @@ const GuestDashboard = () => {
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
-              <MapController center={mapCenter} />
+              <MapController center={mapCenter} zoom={mapZoom} />
+              {/* User location marker */}
+              {userLocation && (
+                <Marker
+                  position={userLocation}
+                  icon={createUserLocationIcon()}
+                >
+                  <Popup>
+                    <div className="p-2">
+                      <p className="font-semibold text-blue-600 text-sm">Your Location</p>
+                    </div>
+                  </Popup>
+                </Marker>
+              )}
               {filteredSpots.map(spot => (
                 <Marker
                   key={spot.id}
@@ -367,7 +456,7 @@ const GuestDashboard = () => {
               </div>
               <div className="flex gap-2 mt-3">
                 <Select value={maxPrice} onValueChange={setMaxPrice}>
-                  <SelectTrigger className="h-9 bg-slate-50 border-0 rounded-lg" data-testid="price-filter">
+                  <SelectTrigger className="h-9 bg-slate-50 border-0 rounded-lg flex-1" data-testid="price-filter">
                     <Filter className="w-4 h-4 mr-2 text-slate-400" />
                     <SelectValue placeholder="Max Price" />
                   </SelectTrigger>
@@ -378,6 +467,20 @@ const GuestDashboard = () => {
                     <SelectItem value="20">Under $20/hr</SelectItem>
                   </SelectContent>
                 </Select>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleLocateMe}
+                  disabled={locatingUser}
+                  className="h-9 bg-white border-slate-200 hover:bg-blue-50 hover:border-blue-300 rounded-lg px-3"
+                  data-testid="locate-me-btn"
+                >
+                  {locatingUser ? (
+                    <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
+                  ) : (
+                    <Crosshair className="w-4 h-4 text-blue-500" />
+                  )}
+                </Button>
               </div>
             </div>
           </div>
