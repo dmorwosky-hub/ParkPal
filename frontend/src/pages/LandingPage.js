@@ -74,8 +74,8 @@ const LandingPage = () => {
             >
               <div className="relative rounded-2xl overflow-hidden shadow-2xl">
                 <img
-                  src="https://images.unsplash.com/photo-1759369484704-fefd537878f1?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzF8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBjYXIlMjBpbiUyMGRyaXZld2F5fGVufDB8fHx8MTc2OTY0MDg2MXww&ixlib=rb-4.1.0&q=85&w=800"
-                  alt="Modern car parked in driveway"
+                  src="https://customer-assets.emergentagent.com/job_dda2a2e5-addf-4640-ac60-5e5f3f527caf/artifacts/r5h4h5hy_Gemini_Generated_Image_ri4iidri4iidri4i.png"
+                  alt="Aerial view of house with car parked in driveway"
                   className="w-full h-[400px] object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
