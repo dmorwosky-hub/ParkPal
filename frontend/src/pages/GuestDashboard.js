@@ -468,17 +468,19 @@ const GuestDashboard = () => {
                   </SelectContent>
                 </Select>
                 <Button
-                  variant="outline"
-                  size="sm"
                   onClick={handleLocateMe}
                   disabled={locatingUser}
-                  className="h-9 bg-white border-slate-200 hover:bg-blue-50 hover:border-blue-300 rounded-lg px-3"
+                  className="h-9 bg-blue-500 hover:bg-blue-600 text-white rounded-lg px-3 font-medium text-xs shadow-md"
                   data-testid="locate-me-btn"
                 >
                   {locatingUser ? (
-                    <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
+                    <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
-                    <Crosshair className="w-4 h-4 text-blue-500" />
+                    <>
+                      <Crosshair className="w-4 h-4 mr-1.5" />
+                      <span className="hidden sm:inline">My Location</span>
+                      <span className="sm:hidden">Near Me</span>
+                    </>
                   )}
                 </Button>
               </div>
