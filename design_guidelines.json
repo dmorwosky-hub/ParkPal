@@ -1,134 +1,114 @@
 {
-  "identity": {
-    "name": "Park-Pal",
-    "mission": "A hyper-local, peer-to-peer parking marketplace connecting homeowners with drivers.",
-    "vibe": "Modern, High-Utility, Safety-Focused, Trustworthy.",
-    "archetype": "The Performance Pro (Utility & Precision)",
-    "theme_strategy": "Hybrid Utility - Light Mode Dominant for Map/Driving visibility, Dark Asphalt accents for Brand Identity."
-  },
+  "theme": "dark",
+  "archetype": "5 (Jewel & Luxury) + 4 (Swiss & High-Contrast)",
+  "vibe": "High-end Silicon Valley startup, sophisticated, premium, trustworthy",
   "typography": {
-    "font_family": {
-      "headings": "Montserrat, sans-serif",
-      "body": "Roboto, sans-serif"
-    },
-    "usage": {
-      "headings": "Use Montserrat for all headers (h1-h6). Weight: Bold (700) or ExtraBold (800) for hero sections. Letter-spacing: -0.02em.",
-      "body": "Use Roboto for all interface text, labels, and inputs. Weight: Regular (400) or Medium (500).",
-      "mono": "Use JetBrains Mono or Roboto Mono for license plates and time counters."
-    },
-    "scale": {
-      "h1": "text-4xl md:text-6xl font-bold tracking-tight",
-      "h2": "text-3xl md:text-4xl font-bold tracking-tight",
-      "h3": "text-2xl font-semibold",
-      "body_lg": "text-lg leading-relaxed",
-      "body_base": "text-base leading-normal",
-      "caption": "text-sm text-muted-foreground"
-    }
+    "heading_font": "Cabinet Grotesk",
+    "body_font": "Inter",
+    "rules": [
+      "Use tracking-tight for all headings > 32px",
+      "Avoid Inter for headings",
+      "Use font-light or font-black for extreme contrast, avoiding standard bold",
+      "Overlines must be uppercase, text-xs, tracking-[0.2em]"
+    ]
   },
   "colors": {
-    "brand": {
-      "asphalt_grey": "#34495E",
-      "safety_orange": "#E67E22",
-      "clean_white": "#ECF0F1",
-      "success_green": "#27AE60",
-      "alert_red": "#C0392B"
+    "background": {
+      "default": "#022c22", 
+      "paper": "#064e3b", 
+      "obsidian": "#0a0a0a"
     },
-    "tailwind_mapping": {
-      "primary": "hsl(210, 29%, 29%)", 
-      "primary_foreground": "hsl(0, 0%, 100%)",
-      "secondary": "hsl(28, 80%, 52%)",
-      "secondary_foreground": "hsl(0, 0%, 100%)",
-      "background": "hsl(210, 20%, 98%)",
-      "foreground": "hsl(210, 29%, 20%)",
-      "muted": "hsl(210, 20%, 90%)",
-      "muted_foreground": "hsl(210, 10%, 40%)",
-      "border": "hsl(210, 20%, 85%)",
-      "card": "hsl(0, 0%, 100%)",
-      "card_foreground": "hsl(210, 29%, 29%)"
+    "primary": {
+      "default": "#34d399",
+      "hover": "#6ee7b7",
+      "glow": "rgba(52, 211, 153, 0.3)"
     },
-    "usage_rules": {
-      "primary_action": "Use Safety Orange (#E67E22) for primary CTAs (Book Now, Go Active) and Map Pins.",
-      "chrome": "Use Asphalt Grey (#34495E) for Sidebars, Headers, and Footer backgrounds.",
-      "surface": "Use Clean White (#ECF0F1) for page backgrounds. Pure White (#FFFFFF) for Cards to create lift.",
-      "text": "Main text should be Asphalt Grey or Dark Slate. Never pure black."
+    "text": {
+      "primary": "#ffffff",
+      "secondary": "#94a3b8",
+      "muted": "#64748b"
+    },
+    "border": {
+      "default": "rgba(255,255,255,0.1)",
+      "highlight": "rgba(255,255,255,0.2)"
     }
   },
-  "layout": {
-    "grid_system": "Bento Grid for Dashboards. Mobile-first single column for booking flows.",
-    "spacing": "Generous padding. p-4 is minimum for containers. p-6 or p-8 for cards.",
-    "radius": "rounded-xl (12px) for cards and inputs. rounded-full for buttons.",
-    "containers": {
-      "mobile_map_sheet": "Fixed bottom sheet with rounded-t-3xl shadow-2xl bg-white z-50",
-      "dashboard_card": "bg-white border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200"
+  "spacing_and_layout": {
+    "philosophy": "Generous spacing. p-8 to p-12 inside containers.",
+    "border_radius": "12px (rounded-xl)",
+    "shadows": {
+      "subtle": "0 8px 32px rgba(0,0,0,0.4)",
+      "glow": "0 0 20px rgba(52,211,153,0.15)"
+    },
+    "grids": {
+      "marketing": "Asymmetrical Bento Grid (Tetris Mode) - mix 3+ shapes, wide gaps (gap-8).",
+      "dashboard": "Control Room Grid - dense, tight gaps (gap-6), every pixel utilized."
     }
   },
   "components": {
-    "buttons": {
-      "primary": "bg-[#E67E22] hover:bg-[#D35400] text-white font-bold rounded-full shadow-lg hover:shadow-xl transition-transform active:scale-95",
-      "secondary": "bg-white border-2 border-[#34495E] text-[#34495E] hover:bg-slate-50 font-semibold rounded-full",
-      "ghost": "text-[#34495E] hover:bg-slate-100 rounded-lg"
-    },
-    "inputs": {
-      "style": "h-12 bg-white border-slate-300 focus:border-[#E67E22] focus:ring-[#E67E22] rounded-lg text-lg",
-      "license_plate": "font-mono uppercase tracking-widest border-4 border-black/10 bg-yellow-50 text-center font-bold"
-    },
-    "map_elements": {
-      "pin_active": "Safety Orange (#E67E22) with pulsing ring animation.",
-      "pin_selected": "Scale 1.2x, White border, Drop shadow.",
-      "route_line": "Asphalt Grey (#34495E) dashed line."
+    "icons": {
+      "library": "@phosphor-icons/react",
+      "style": "Thin-stroke, minimalist (weight: 'light' or 'thin')"
     },
     "cards": {
-      "host_stat": "Bento style. White bg, large number in Asphalt Grey, small label in muted grey. Icon in top right."
-    }
-  },
-  "visual_enhancers": {
-    "shadows": "Soft, diffuse shadows for depth. shadow-[0_8px_30px_rgb(0,0,0,0.12)] for floating elements.",
-    "gradients": "Minimal usage. Only subtle vertical gradients on Safety Orange buttons to add tactility.",
-    "textures": "Subtle noise texture on Asphalt Grey backgrounds to prevent flatness.",
-    "motion": {
-      "hover": "translate-y-[-2px] on cards.",
-      "tap": "scale-95 on buttons.",
-      "transition": "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
-    }
-  },
-  "assets": {
-    "images": {
-      "hero_host": {
-        "url": "https://images.unsplash.com/photo-1759369484704-fefd537878f1?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzF8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBjYXIlMjBpbiUyMGRyaXZld2F5fGVufDB8fHx8MTc2OTY0MDg2MXww&ixlib=rb-4.1.0&q=85",
-        "alt": "Modern car parked in a clean driveway",
-        "usage": "Host Landing Page Hero"
-      },
-      "hero_guest": {
-        "url": "https://images.unsplash.com/photo-1758521961483-30f5908b9c93?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzR8MHwxfHNlYXJjaHwxfHxoYXBweSUyMGRyaXZlciUyMGhvbGRpbmclMjBwaG9uZXxlbnwwfHx8fDE3Njk2NDA4NjN8MA&ixlib=rb-4.1.0&q=85",
-        "alt": "Happy driver using phone in car",
-        "usage": "Guest Landing Page Hero"
-      },
-      "parking_context": {
-        "url": "https://images.unsplash.com/photo-1653930534246-5156ebfeddc8?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NTN8MHwxfHNlYXJjaHwzfHxjaXR5JTIwc3RyZWV0JTIwcGFya2luZyUyMG92ZXJoZWFkfGVufDB8fHx8MTc2OTY0MDg2NXww&ixlib=rb-4.1.0&q=85",
-        "alt": "Aerial view of parking",
-        "usage": "Context backgrounds or About page"
-      }
+      "style": "Glassmorphism: backdrop-blur-xl bg-black/40 border border-white/10 rounded-xl",
+      "hover": "Slight lift (-translate-y-1) and enhanced shadow."
     },
-    "icons": {
-      "library": "lucide-react",
-      "style": "Stroke width 2px. Rounded line caps."
+    "buttons": {
+      "primary": "bg-[#34d399] text-[#022c22] font-semibold rounded-xl hover:bg-[#6ee7b7] transition-all",
+      "secondary": "bg-transparent border border-white/20 text-white rounded-xl hover:bg-white/5"
+    },
+    "hero": {
+      "overlay": "bg-black/40 to bg-black/60 gradient for readability",
+      "search_bar": "Centered glassmorphism panel, thick padding (p-4), separated inputs, primary CTA attached."
+    },
+    "map": {
+      "style": "Dark mode tiles (e.g., CartoDB Dark Matter). Glowing pins for spots."
     }
   },
-  "accessibility": {
-    "contrast": "Ensure text on Safety Orange is White or Dark Grey depending on size. Use APCA.",
-    "focus_states": "Visible ring-2 ring-offset-2 ring-[#34495E] on all interactive elements.",
-    "touch_targets": "Minimum 44x44px for all mobile tap targets."
+  "media": {
+    "images": [
+      {
+        "category": "hero_background",
+        "url": "https://images.unsplash.com/photo-1762117360928-1548ff7ab5a2?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzMzN8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBob3VzZSUyMGRyaXZld2F5fGVufDB8fHx8MTc3Njg2NzA1N3ww&ixlib=rb-4.1.0&q=85",
+        "description": "Modern house with driveway (aerial/wide feel), perfect for hero background. Use with heavy dark overlay."
+      },
+      {
+        "category": "dashboard_map_fallback",
+        "url": "https://images.unsplash.com/photo-1558798950-b05b143f435b?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxOTF8MHwxfHNlYXJjaHwyfHxhZXJpYWwlMjBwYXJraW5nJTIwbG90JTIwY2l0eXxlbnwwfHx8fDE3NzY4NjcwNzF8MA&ixlib=rb-4.1.0&q=85",
+        "description": "Aerial view of a parking lot to use in spot detail views or fallback images."
+      },
+      {
+        "category": "user_avatar_1",
+        "url": "https://images.unsplash.com/photo-1586297135537-94bc9ba060aa?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NzV8MHwxfHNlYXJjaHwyfHx1c2VyJTIwYXZhdGFyJTIwcG9ydHJhaXR8ZW58MHx8fHwxNzc2ODY3MDU3fDA&ixlib=rb-4.1.0&q=85",
+        "description": "Host avatar"
+      },
+      {
+        "category": "user_avatar_2",
+        "url": "https://images.unsplash.com/photo-1704726135027-9c6f034cfa41?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NzV8MHwxfHNlYXJjaHwxfHx1c2VyJTIwYXZhdGFyJTIwcG9ydHJhaXR8ZW58MHx8fHwxNzc2ODY3MDU3fDA&ixlib=rb-4.1.0&q=85",
+        "description": "Guest avatar"
+      },
+      {
+        "category": "spot_image_1",
+        "url": "https://images.pexels.com/photos/8134848/pexels-photo-8134848.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "description": "High-end driveway for premium spot listing."
+      },
+      {
+        "category": "spot_image_2",
+        "url": "https://images.unsplash.com/photo-1760104176110-abfb35d749df?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzMzN8MHwxfHNlYXJjaHwyfHxtb2Rlcm4lMjBob3VzZSUyMGRyaXZld2F5fGVufDB8fHx8MTc3Njg2NzA1N3ww&ixlib=rb-4.1.0&q=85",
+        "description": "Suburban street driveway."
+      }
+    ]
   },
-  "instructions_to_main_agent": {
-    "setup": "Install 'lucide-react' and 'framer-motion'. Configure Tailwind theme with the mapped colors.",
-    "map_integration": "Use 'react-leaflet' or 'react-map-gl'. If mocking, create a visually rich placeholder with the 'parking_context' image and overlay pins.",
-    "mobile_first": "Design for mobile viewport first. Use 'Sheet' component from Shadcn for map details.",
-    "testing": "Add data-testid to all buttons, inputs, and cards."
-  },
-  "universal_guidelines": {
-    "avoid_generic": "Do not use default Shadcn styling. Override borders and shadows.",
-    "no_gradients": "Do not use dark gradients. Use solid Asphalt Grey.",
-    "spacing": "Use p-6 or p-8 for internal card padding.",
-    "animation": "Add micro-interactions to every button and card hover."
-  }
+  "instructions_to_main_agent": [
+    "Strictly apply Dark Theme with Deep Emerald base (#022c22, #064e3b). Do not use pure black except for the absolute lowest layers or overlays.",
+    "Do NOT use generic feature boxes. Use a Bento/Tetris asymmetrical grid for the landing page.",
+    "Use Phosphor Icons (thin/light weight) exclusively. Run yarn add @phosphor-icons/react",
+    "Ensure all components have exactly 12px (rounded-xl) border radius.",
+    "Apply subtle, deep drop shadows (0 8px 32px rgba(0,0,0,0.4)), NEVER flat brutalist shadows.",
+    "Integrate Leaflet map using a Dark Mode tile layer. Map should take up significant screen real estate on the dashboard.",
+    "Include data-testid on all interactive elements.",
+    "Use Glassmorphism (backdrop-blur-xl bg-black/40 border border-white/10) for the centered search overlay on the hero section.",
+    "Do not use Inter for Headings. Use Cabinet Grotesk for headings and Inter for body text."
+  ]
 }
