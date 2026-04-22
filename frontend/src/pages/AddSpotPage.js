@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../co
 import { Textarea } from '../components/ui/textarea';
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
-import { ArrowLeft, MapPin, DollarSign, Loader2, Check } from 'lucide-react';
+import { ArrowLeft, MapPin, DollarSign, Loader2, Check, Crosshair } from 'lucide-react';
 import { toast } from 'sonner';
 import 'leaflet/dist/leaflet.css';
 
@@ -66,6 +66,7 @@ const AddSpotPage = () => {
   const [loading, setLoading] = useState(false);
   const [position, setPosition] = useState(null);
   const [mapCenter, setMapCenter] = useState([34.0522, -118.2437]);
+  const [locatingUser, setLocatingUser] = useState(false);
   
   const [formData, setFormData] = useState({
     address: '',
@@ -87,6 +88,26 @@ const AddSpotPage = () => {
       );
     }
   }, []);
+
+  const handleLocateMe = () => {
+    if (!('geolocation' in navigator)) {
+      toast.error('Geolocation not supported');
+      return;
+    }
+    setLocatingUser(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const loc = [pos.coords.latitude, pos.coords.longitude];
+        setMapCenter(loc);
+        setLocatingUser(false);
+      },
+      () => {
+        toast.error('Could not get location. Please allow location access.');
+        setLocatingUser(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -146,9 +167,25 @@ const AddSpotPage = () => {
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Location Picker */}
               <div>
-                <Label className="text-[#34495E] font-semibold mb-3 block">
-                  Click on the map to set your spot location *
-                </Label>
+                <div className="flex items-center justify-between mb-3">
+                  <Label className="text-[#34495E] font-semibold">
+                    Click on the map to set your spot location *
+                  </Label>
+                  <Button
+                    type="button"
+                    onClick={handleLocateMe}
+                    disabled={locatingUser}
+                    className="bg-blue-500 hover:bg-blue-600 text-white rounded-lg px-3 h-8 text-xs font-medium"
+                    data-testid="add-spot-locate-btn"
+                  >
+                    {locatingUser ? (
+                      <Loader2 className="w-3 h-3 animate-spin mr-1" />
+                    ) : (
+                      <Crosshair className="w-3 h-3 mr-1" />
+                    )}
+                    My Location
+                  </Button>
+                </div>
                 <div className="h-64 rounded-xl overflow-hidden border-2 border-slate-200">
                   <MapContainer
                     center={mapCenter}
