@@ -1,39 +1,20 @@
 import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/button';
-import { Car, MapPin, ArrowLeft } from 'lucide-react';
+import { Car, MapPin } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
 
-const NotFoundPage = () => {
-  return (
-    <div className="min-h-screen bg-[#ECF0F1] flex items-center justify-center p-4">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-center max-w-md"
-      >
-        <div className="w-24 h-24 rounded-full bg-[#34495E] flex items-center justify-center mx-auto mb-6">
-          <MapPin className="w-12 h-12 text-[#E67E22]" />
-        </div>
-        <h1 className="text-6xl font-bold text-[#34495E] mb-2" style={{ fontFamily: 'Montserrat' }} data-testid="404-heading">
-          404
-        </h1>
-        <p className="text-xl font-semibold text-[#34495E] mb-2" style={{ fontFamily: 'Montserrat' }}>
-          Spot Not Found
-        </p>
-        <p className="text-slate-500 mb-8">
-          Looks like this parking spot doesn't exist. Let's get you back on the road.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <Link to="/">
-            <Button className="bg-[#E67E22] hover:bg-[#D35400] text-white rounded-full font-bold px-8 py-5 shadow-lg btn-active" data-testid="404-home-btn">
-              <Car className="w-5 h-5 mr-2" />
-              Back to Park-Pal
-            </Button>
-          </Link>
-        </div>
-      </motion.div>
-    </div>
-  );
-};
+const NotFoundPage = () => (
+  <div className="min-h-screen bg-[#022c22] flex items-center justify-center p-4">
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center max-w-md">
+      <div className="w-24 h-24 rounded-2xl bg-[#064e3b] border border-white/10 flex items-center justify-center mx-auto mb-6">
+        <MapPin size={48} weight="light" className="text-[#34d399]" />
+      </div>
+      <h1 className="font-heading text-6xl font-black text-white mb-2 tracking-tight" data-testid="404-heading">404</h1>
+      <p className="font-heading text-xl font-bold text-white mb-2">Spot Not Found</p>
+      <p className="text-slate-500 mb-8">This parking spot doesn't exist. Let's get you back on the road.</p>
+      <Link to="/"><Button className="bg-[#34d399] hover:bg-[#6ee7b7] text-[#022c22] rounded-xl font-semibold px-8 py-5 shadow-lg shadow-emerald-500/20 btn-active" data-testid="404-home-btn"><Car size={20} weight="bold" className="mr-2" /> Back to Park-Pal</Button></Link>
+    </motion.div>
+  </div>
+);
 
 export default NotFoundPage;

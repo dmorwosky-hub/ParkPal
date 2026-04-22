@@ -2,58 +2,57 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Roboto:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap');
+@import url('https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@100,200,400,500,700,800,900&display=swap');
 
 body {
     margin: 0;
-    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    background: #022c22;
+    color: #ffffff;
 }
 
 h1, h2, h3, h4, h5, h6 {
-    font-family: 'Montserrat', sans-serif;
+    font-family: 'Cabinet Grotesk', 'Inter', sans-serif;
 }
 
-.font-mono {
-    font-family: 'JetBrains Mono', monospace;
+.font-heading {
+    font-family: 'Cabinet Grotesk', 'Inter', sans-serif;
 }
 
 @layer base {
     :root {
-        --background: 210 20% 98%;
-        --foreground: 210 29% 20%;
-        --card: 0 0% 100%;
-        --card-foreground: 210 29% 29%;
-        --popover: 0 0% 100%;
-        --popover-foreground: 210 29% 29%;
-        --primary: 210 29% 29%;
-        --primary-foreground: 0 0% 100%;
-        --secondary: 28 80% 52%;
+        --background: 155 90% 8%;
+        --foreground: 0 0% 100%;
+        --card: 0 0% 0%;
+        --card-foreground: 0 0% 100%;
+        --popover: 155 70% 12%;
+        --popover-foreground: 0 0% 100%;
+        --primary: 160 64% 52%;
+        --primary-foreground: 155 90% 8%;
+        --secondary: 155 70% 12%;
         --secondary-foreground: 0 0% 100%;
-        --muted: 210 20% 90%;
-        --muted-foreground: 210 10% 40%;
-        --accent: 28 80% 52%;
-        --accent-foreground: 0 0% 100%;
-        --destructive: 6 78% 57%;
+        --muted: 215 16% 34%;
+        --muted-foreground: 215 16% 57%;
+        --accent: 160 64% 52%;
+        --accent-foreground: 155 90% 8%;
+        --destructive: 0 72% 51%;
         --destructive-foreground: 0 0% 100%;
-        --success: 145 63% 42%;
-        --success-foreground: 0 0% 100%;
-        --border: 210 20% 85%;
-        --input: 210 20% 85%;
-        --ring: 28 80% 52%;
-        --chart-1: 28 80% 52%;
-        --chart-2: 210 29% 29%;
-        --chart-3: 145 63% 42%;
-        --chart-4: 6 78% 57%;
-        --chart-5: 210 20% 60%;
+        --border: 0 0% 100% / 0.1;
+        --input: 0 0% 100% / 0.1;
+        --ring: 160 64% 52%;
         --radius: 0.75rem;
-        
-        --asphalt: #34495E;
-        --orange: #E67E22;
-        --clean-white: #ECF0F1;
-        --success-green: #27AE60;
-        --alert-red: #C0392B;
+
+        --emerald-deep: #022c22;
+        --emerald-mid: #064e3b;
+        --emerald-accent: #34d399;
+        --emerald-light: #6ee7b7;
+        --emerald-glow: rgba(52, 211, 153, 0.3);
+        --glass-bg: rgba(0, 0, 0, 0.4);
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --glass-border-hover: rgba(255, 255, 255, 0.2);
     }
 }
 
@@ -66,132 +65,104 @@ h1, h2, h3, h4, h5, h6 {
     }
 }
 
+/* Glassmorphism */
+.glass {
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glass-hover:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
 /* Map Pin Animation */
 @keyframes pulse-ring {
-    0% {
-        transform: scale(0.8);
-        opacity: 0.8;
-    }
-    50% {
-        transform: scale(1.2);
-        opacity: 0.4;
-    }
-    100% {
-        transform: scale(0.8);
-        opacity: 0.8;
-    }
+    0% { transform: scale(0.8); opacity: 0.8; }
+    50% { transform: scale(1.3); opacity: 0.3; }
+    100% { transform: scale(0.8); opacity: 0.8; }
 }
 
 .map-pin-pulse {
     animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
+/* Glow effect */
+@keyframes glow-pulse {
+    0%, 100% { box-shadow: 0 0 8px rgba(52, 211, 153, 0.4); }
+    50% { box-shadow: 0 0 20px rgba(52, 211, 153, 0.7); }
+}
+
+.glow {
+    animation: glow-pulse 2s ease-in-out infinite;
+}
+
+/* Promoted Pin Glow */
+@keyframes promoted-glow {
+    0%, 100% { box-shadow: 0 0 8px rgba(251, 191, 36, 0.5), 0 0 16px rgba(251, 191, 36, 0.3); }
+    50% { box-shadow: 0 0 20px rgba(251, 191, 36, 0.8), 0 0 30px rgba(251, 191, 36, 0.5); }
+}
+
 /* Custom Scrollbar */
-::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-}
-
-::-webkit-scrollbar-track {
-    background: hsl(var(--muted));
-    border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb {
-    background: hsl(var(--muted-foreground));
-    border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--foreground));
-}
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #022c22; border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: #064e3b; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #34d399; }
 
 /* License Plate Input */
 .license-plate-input {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Inter', monospace;
     text-transform: uppercase;
     letter-spacing: 0.2em;
-    background: linear-gradient(145deg, #fef9c3, #fef08a);
-    border: 3px solid rgba(0, 0, 0, 0.1);
+    background: rgba(52, 211, 153, 0.1);
+    border: 2px solid rgba(52, 211, 153, 0.3);
     text-align: center;
     font-weight: 700;
+    color: #34d399;
 }
 
-/* Leaflet Map Customizations */
+/* Leaflet Dark Mode */
 .leaflet-container {
-    font-family: 'Roboto', sans-serif;
-    border-radius: 0.75rem;
+    font-family: 'Inter', sans-serif;
+    border-radius: 12px;
+    background: #0a0a0a;
 }
 
 .leaflet-popup-content-wrapper {
-    border-radius: 0.75rem;
-    box-shadow: 0 8px 30px rgb(0 0 0 / 0.12);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+    background: #064e3b;
+    color: #ffffff;
 }
 
-.leaflet-popup-tip {
-    background: white;
-}
+.leaflet-popup-tip { background: #064e3b; }
 
-/* Custom marker styles */
-.custom-marker {
-    background: #E67E22;
-    border-radius: 50%;
-    border: 3px solid white;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
+.leaflet-popup-content { margin: 0; }
+.leaflet-popup-tip-container { display: none; }
 
-/* Bottom Sheet Style */
-.bottom-sheet {
-    border-radius: 1.5rem 1.5rem 0 0;
-    box-shadow: 0 -8px 30px rgb(0 0 0 / 0.12);
-}
+.custom-marker-wrapper { background: transparent; border: none; }
 
-/* Card Hover Effect */
+/* Button active */
+.btn-active:active { transform: scale(0.96); }
+
+/* Card hover */
 .card-hover {
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
 .card-hover:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 30px rgb(0 0 0 / 0.12);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
-/* Button Active State */
-.btn-active:active {
-    transform: scale(0.95);
-}
-
-/* Status Badge Animation */
+/* Status pulse */
 @keyframes status-pulse {
-    0%, 100% {
-        opacity: 1;
-    }
-    50% {
-        opacity: 0.5;
-    }
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
 }
-
-.status-active {
-    animation: status-pulse 2s ease-in-out infinite;
-}
-
-/* Promoted Pin Glow Animation */
-@keyframes promoted-glow {
-    0%, 100% {
-        box-shadow: 0 0 5px rgba(155, 89, 182, 0.5), 0 0 10px rgba(155, 89, 182, 0.3);
-    }
-    50% {
-        box-shadow: 0 0 15px rgba(155, 89, 182, 0.8), 0 0 25px rgba(155, 89, 182, 0.5);
-    }
-}
-
-/* Gradient text for hero */
-.gradient-text {
-    background: linear-gradient(135deg, #34495E 0%, #E67E22 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
+.status-active { animation: status-pulse 2s ease-in-out infinite; }
 
 /* Hide external badges */
 #emergent-badge {
@@ -202,4 +173,10 @@ h1, h2, h3, h4, h5, h6 {
     width: 0 !important;
     height: 0 !important;
     overflow: hidden !important;
+}
+
+@layer base {
+    [data-debug-wrapper="true"] {
+        display: contents !important;
+    }
 }

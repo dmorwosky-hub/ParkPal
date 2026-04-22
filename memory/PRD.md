@@ -114,7 +114,16 @@ backend/
   - Web app manifest with 8 icon sizes (72-512px)
   - Install prompt banner for mobile users
   - Apple mobile web app meta tags
-- Copyright year dynamic
+### Phase 4: Premium UI/UX Redesign (Apr 2026)
+- **Complete visual overhaul** to "Deep Emerald" dark mode theme
+- **Design system**: Cabinet Grotesk headings, Inter body, Phosphor Icons (thin-stroke)
+- **Glassmorphism** cards with backdrop-blur, subtle border-white/10
+- **Dark CARTO map tiles** (CartoDB Dark Matter) for maps
+- **Bento/Tetris grid** on landing page (asymmetrical layout)
+- **Hero section** with user's aerial driveway image + dark overlay + centered glassmorphism search
+- **Color palette**: Deep Emerald (#022c22, #064e3b), Emerald accent (#34d399), Amber (#fbbf24) for promotions
+- **All pages rebuilt**: Landing, Login, Register, Guest Dashboard, Host Dashboard, Add Spot, Booking History, Booking Success, Terms, Privacy, 404
+- All tests passing, deployment-ready
 - All tests passing (22/22 backend, 100% frontend)
 - Deployment validated and production-ready
 

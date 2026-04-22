@@ -4,17 +4,14 @@ import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
-import { Car, Mail, Lock, User, ArrowLeft, MapPin, Home } from 'lucide-react';
+import { Car, EnvelopeSimple, Lock, User, MapPin, House } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { cn } from '../lib/utils';
 
 const RegisterPage = () => {
   const [searchParams] = useSearchParams();
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    fullName: '',
+    email: '', password: '', fullName: '',
     role: searchParams.get('role') || 'guest'
   });
   const [loading, setLoading] = useState(false);
@@ -30,158 +27,95 @@ const RegisterPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.email || !formData.password || !formData.fullName) {
-      toast.error('Please fill in all fields');
-      return;
-    }
-    if (formData.password.length < 6) {
-      toast.error('Password must be at least 6 characters');
-      return;
-    }
-    
+    if (!formData.email || !formData.password || !formData.fullName) { toast.error('Please fill in all fields'); return; }
+    if (formData.password.length < 6) { toast.error('Password must be at least 6 characters'); return; }
     setLoading(true);
     try {
-      const user = await register(
-        formData.email,
-        formData.password,
-        formData.fullName,
-        formData.role
-      );
-      toast.success('Account created successfully!');
+      const user = await register(formData.email, formData.password, formData.fullName, formData.role);
+      toast.success('Account created!');
       navigate(user.role === 'host' ? '/host/dashboard' : '/guest/dashboard');
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Registration failed');
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
   return (
-    <div className="min-h-screen bg-[#ECF0F1] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#022c22] flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <Link to="/" className="inline-flex items-center gap-2 text-[#34495E] hover:text-[#E67E22] mb-8 transition-colors">
-          <ArrowLeft className="w-4 h-4" />
-          Back to home
+        <Link to="/" className="inline-flex items-center gap-2 text-slate-400 hover:text-[#34d399] mb-8 transition-colors text-sm">
+          &larr; Back to home
         </Link>
-        
-        <Card className="bg-white border-0 shadow-xl rounded-2xl overflow-hidden">
-          <CardHeader className="text-center pb-2 pt-8">
-            <div className="w-16 h-16 rounded-full bg-[#E67E22] flex items-center justify-center mx-auto mb-4">
-              <Car className="w-8 h-8 text-white" />
+        <div className="glass rounded-xl overflow-hidden">
+          <div className="text-center pb-2 pt-10 px-8">
+            <div className="w-14 h-14 rounded-xl bg-[#34d399] flex items-center justify-center mx-auto mb-5">
+              <Car size={28} weight="bold" className="text-[#022c22]" />
             </div>
-            <CardTitle className="text-2xl font-bold text-[#34495E]" style={{ fontFamily: 'Montserrat' }}>
-              Create Account
-            </CardTitle>
-            <CardDescription className="text-slate-500">
-              Join Park-Pal today
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-8">
+            <h1 className="font-heading text-2xl font-bold text-white tracking-tight">Create Account</h1>
+            <p className="text-slate-400 text-sm mt-1">Join Park-Pal today</p>
+          </div>
+          <div className="p-8">
             {/* Role Selection */}
             <div className="grid grid-cols-2 gap-3 mb-6">
-              <button
-                type="button"
-                onClick={() => setFormData(prev => ({ ...prev, role: 'guest' }))}
-                className={cn(
-                  "p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2",
-                  formData.role === 'guest'
-                    ? "border-[#E67E22] bg-orange-50"
-                    : "border-slate-200 hover:border-slate-300"
-                )}
-                data-testid="role-guest-btn"
-              >
-                <MapPin className={cn("w-6 h-6", formData.role === 'guest' ? "text-[#E67E22]" : "text-slate-400")} />
-                <span className={cn("font-semibold", formData.role === 'guest' ? "text-[#E67E22]" : "text-slate-600")}>
-                  I'm a Driver
-                </span>
-                <span className="text-xs text-slate-500">Find parking</span>
+              <button type="button" onClick={() => setFormData(prev => ({ ...prev, role: 'guest' }))}
+                className={cn("p-4 rounded-xl border transition-all flex flex-col items-center gap-2",
+                  formData.role === 'guest' ? "border-[#34d399] bg-[#34d399]/10" : "border-white/10 hover:border-white/20"
+                )} data-testid="role-guest-btn">
+                <MapPin size={24} weight="light" className={formData.role === 'guest' ? "text-[#34d399]" : "text-slate-500"} />
+                <span className={cn("font-semibold text-sm", formData.role === 'guest' ? "text-[#34d399]" : "text-slate-400")}>I'm a Driver</span>
+                <span className="text-xs text-slate-600">Find parking</span>
               </button>
-              <button
-                type="button"
-                onClick={() => setFormData(prev => ({ ...prev, role: 'host' }))}
-                className={cn(
-                  "p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2",
-                  formData.role === 'host'
-                    ? "border-[#E67E22] bg-orange-50"
-                    : "border-slate-200 hover:border-slate-300"
-                )}
-                data-testid="role-host-btn"
-              >
-                <Home className={cn("w-6 h-6", formData.role === 'host' ? "text-[#E67E22]" : "text-slate-400")} />
-                <span className={cn("font-semibold", formData.role === 'host' ? "text-[#E67E22]" : "text-slate-600")}>
-                  I'm a Host
-                </span>
-                <span className="text-xs text-slate-500">List my driveway</span>
+              <button type="button" onClick={() => setFormData(prev => ({ ...prev, role: 'host' }))}
+                className={cn("p-4 rounded-xl border transition-all flex flex-col items-center gap-2",
+                  formData.role === 'host' ? "border-[#34d399] bg-[#34d399]/10" : "border-white/10 hover:border-white/20"
+                )} data-testid="role-host-btn">
+                <House size={24} weight="light" className={formData.role === 'host' ? "text-[#34d399]" : "text-slate-500"} />
+                <span className={cn("font-semibold text-sm", formData.role === 'host' ? "text-[#34d399]" : "text-slate-400")}>I'm a Host</span>
+                <span className="text-xs text-slate-600">List my driveway</span>
               </button>
             </div>
-
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="fullName" className="text-[#34495E] font-medium">Full Name</Label>
+                <Label className="text-slate-300 font-medium text-sm">Full Name</Label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                  <Input
-                    id="fullName"
-                    type="text"
-                    placeholder="John Doe"
-                    value={formData.fullName}
+                  <User size={18} weight="light" className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                  <Input type="text" placeholder="John Doe" value={formData.fullName}
                     onChange={(e) => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
-                    className="pl-10 h-12 bg-slate-50 border-slate-200 focus:border-[#E67E22] focus:ring-[#E67E22] rounded-xl"
-                    data-testid="register-name-input"
-                  />
+                    className="pl-10 h-12 bg-white/5 border-white/10 text-white placeholder:text-slate-600 focus:border-[#34d399] focus:ring-[#34d399]/20 rounded-xl"
+                    data-testid="register-name-input" />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-[#34495E] font-medium">Email</Label>
+                <Label className="text-slate-300 font-medium text-sm">Email</Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="you@example.com"
-                    value={formData.email}
+                  <EnvelopeSimple size={18} weight="light" className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                  <Input type="email" placeholder="you@example.com" value={formData.email}
                     onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                    className="pl-10 h-12 bg-slate-50 border-slate-200 focus:border-[#E67E22] focus:ring-[#E67E22] rounded-xl"
-                    data-testid="register-email-input"
-                  />
+                    className="pl-10 h-12 bg-white/5 border-white/10 text-white placeholder:text-slate-600 focus:border-[#34d399] focus:ring-[#34d399]/20 rounded-xl"
+                    data-testid="register-email-input" />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-[#34495E] font-medium">Password</Label>
+                <Label className="text-slate-300 font-medium text-sm">Password</Label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={formData.password}
+                  <Lock size={18} weight="light" className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                  <Input type="password" placeholder="••••••••" value={formData.password}
                     onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
-                    className="pl-10 h-12 bg-slate-50 border-slate-200 focus:border-[#E67E22] focus:ring-[#E67E22] rounded-xl"
-                    data-testid="register-password-input"
-                  />
+                    className="pl-10 h-12 bg-white/5 border-white/10 text-white placeholder:text-slate-600 focus:border-[#34d399] focus:ring-[#34d399]/20 rounded-xl"
+                    data-testid="register-password-input" />
                 </div>
               </div>
-              <Button
-                type="submit"
-                disabled={loading}
-                className="w-full h-12 bg-[#E67E22] hover:bg-[#D35400] text-white rounded-full font-bold shadow-lg hover:shadow-xl transition-all btn-active"
-                data-testid="register-submit-btn"
-              >
-                {loading ? (
-                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
-                ) : (
-                  'Create Account'
-                )}
+              <Button type="submit" disabled={loading}
+                className="w-full h-12 bg-[#34d399] hover:bg-[#6ee7b7] text-[#022c22] rounded-xl font-semibold shadow-lg shadow-emerald-500/20 btn-active"
+                data-testid="register-submit-btn">
+                {loading ? <div className="animate-spin rounded-full h-5 w-5 border-2 border-[#022c22] border-t-transparent" /> : 'Create Account'}
               </Button>
             </form>
-            <p className="text-center text-slate-500 mt-6">
+            <p className="text-center text-slate-500 mt-6 text-sm">
               Already have an account?{' '}
-              <Link to="/login" className="text-[#E67E22] font-semibold hover:underline" data-testid="register-to-login-link">
-                Sign in
-              </Link>
+              <Link to="/login" className="text-[#34d399] font-semibold hover:underline" data-testid="register-to-login-link">Sign in</Link>
             </p>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   );
