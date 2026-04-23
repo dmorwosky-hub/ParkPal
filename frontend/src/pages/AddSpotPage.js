@@ -32,11 +32,20 @@ const AddSpotPage = () => {
   const [locating, setLocating] = useState(false);
   const [formData, setFormData] = useState({ address: '', city: '', state: '', zip_code: '', hourly_rate: '', event_rate: '', description: '' });
 
-  useEffect(() => { if ('geolocation' in navigator) navigator.geolocation.getCurrentPosition(p => setMapCenter([p.coords.latitude, p.coords.longitude]), () => {}, { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }); }, []);
+  useEffect(() => { if ('geolocation' in navigator) navigator.geolocation.getCurrentPosition(p => setMapCenter([p.coords.latitude, p.coords.longitude]), () => {}, { enableHighAccuracy: false, timeout: 15000, maximumAge: 600000 }); }, []);
 
   const handleLocate = () => {
     setLocating(true);
-    navigator.geolocation.getCurrentPosition(p => { setMapCenter([p.coords.latitude, p.coords.longitude]); setLocating(false); }, () => { toast.error('Allow location access'); setLocating(false); }, { enableHighAccuracy: true, timeout: 10000 });
+    navigator.geolocation.getCurrentPosition(
+      p => { setMapCenter([p.coords.latitude, p.coords.longitude]); setLocating(false); toast.success('Location found!'); },
+      (err) => {
+        setLocating(false);
+        if (err.code === 1) toast.error('Location access denied. Enable it in browser settings.');
+        else if (err.code === 2) toast.error('Location unavailable. Check your device GPS.');
+        else toast.error('Location timed out. Try again.');
+      },
+      { enableHighAccuracy: false, timeout: 15000, maximumAge: 0 }
+    );
   };
 
   const handleSubmit = async (e) => {

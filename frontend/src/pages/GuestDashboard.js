@@ -81,18 +81,31 @@ const GuestDashboard = () => {
     if ('geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
         (p) => { const loc = [p.coords.latitude, p.coords.longitude]; setUserLocation(loc); setMapCenter(loc); setMapZoom(14); },
-        () => {}, { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
+        () => {}, { enableHighAccuracy: false, timeout: 15000, maximumAge: 600000 }
       );
     }
   }, []);
 
   const handleLocateMe = () => {
-    if (!('geolocation' in navigator)) { toast.error('Geolocation not supported'); return; }
+    if (!('geolocation' in navigator)) { toast.error('Geolocation is not supported by your browser'); return; }
     setLocatingUser(true);
     navigator.geolocation.getCurrentPosition(
-      (p) => { const loc = [p.coords.latitude, p.coords.longitude]; setUserLocation(loc); setMapCenter(loc); setMapZoom(15); setLocatingUser(false); },
-      () => { toast.error('Allow location access'); setLocatingUser(false); },
-      { enableHighAccuracy: true, timeout: 10000 }
+      (p) => { const loc = [p.coords.latitude, p.coords.longitude]; setUserLocation(loc); setMapCenter(loc); setMapZoom(15); setLocatingUser(false); toast.success('Location found!'); },
+      (err) => {
+        setLocatingUser(false);
+        if (err.code === 1) toast.error('Location access was denied. Please enable it in your browser settings.');
+        else if (err.code === 2) toast.error('Location unavailable. Try again or check your device GPS.');
+        else if (err.code === 3) toast.error('Location request timed out. Trying again...');
+        // Retry with low accuracy on timeout
+        if (err.code === 3) {
+          navigator.geolocation.getCurrentPosition(
+            (p) => { const loc = [p.coords.latitude, p.coords.longitude]; setUserLocation(loc); setMapCenter(loc); setMapZoom(15); toast.success('Location found!'); },
+            () => toast.error('Could not determine your location.'),
+            { enableHighAccuracy: false, timeout: 20000, maximumAge: 0 }
+          );
+        }
+      },
+      { enableHighAccuracy: false, timeout: 15000, maximumAge: 0 }
     );
   };
 
