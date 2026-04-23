@@ -2,169 +2,185 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap');
-@import url('https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@100,200,400,500,700,800,900&display=swap');
+@import '@fontsource/space-grotesk/300.css';
+@import '@fontsource/space-grotesk/400.css';
+@import '@fontsource/space-grotesk/500.css';
+@import '@fontsource/space-grotesk/600.css';
+@import '@fontsource/space-grotesk/700.css';
+@import '@fontsource/jetbrains-mono/400.css';
+@import '@fontsource/jetbrains-mono/500.css';
+@import '@fontsource/jetbrains-mono/700.css';
 
 body {
     margin: 0;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background: #022c22;
+    background: #121212;
     color: #ffffff;
 }
 
-h1, h2, h3, h4, h5, h6 {
-    font-family: 'Cabinet Grotesk', 'Inter', sans-serif;
+h1, h2, h3, h4, h5, h6, .font-heading {
+    font-family: 'Space Grotesk', sans-serif;
 }
 
-.font-heading {
-    font-family: 'Cabinet Grotesk', 'Inter', sans-serif;
+.font-mono, .font-data {
+    font-family: 'JetBrains Mono', monospace;
 }
 
 @layer base {
     :root {
-        --background: 155 90% 8%;
+        --background: 0 0% 7%;
         --foreground: 0 0% 100%;
-        --card: 0 0% 0%;
+        --card: 0 0% 7%;
         --card-foreground: 0 0% 100%;
-        --popover: 155 70% 12%;
+        --popover: 0 0% 10%;
         --popover-foreground: 0 0% 100%;
-        --primary: 160 64% 52%;
-        --primary-foreground: 155 90% 8%;
-        --secondary: 155 70% 12%;
+        --primary: 72 100% 50%;
+        --primary-foreground: 0 0% 7%;
+        --secondary: 0 0% 14%;
         --secondary-foreground: 0 0% 100%;
-        --muted: 215 16% 34%;
-        --muted-foreground: 215 16% 57%;
-        --accent: 160 64% 52%;
-        --accent-foreground: 155 90% 8%;
+        --muted: 0 0% 20%;
+        --muted-foreground: 0 0% 50%;
+        --accent: 72 100% 50%;
+        --accent-foreground: 0 0% 7%;
         --destructive: 0 72% 51%;
         --destructive-foreground: 0 0% 100%;
-        --border: 0 0% 100% / 0.1;
-        --input: 0 0% 100% / 0.1;
-        --ring: 160 64% 52%;
-        --radius: 0.75rem;
+        --border: 0 0% 100% / 0.08;
+        --input: 0 0% 100% / 0.08;
+        --ring: 72 100% 50%;
+        --radius: 0px;
 
-        --emerald-deep: #022c22;
-        --emerald-mid: #064e3b;
-        --emerald-accent: #34d399;
-        --emerald-light: #6ee7b7;
-        --emerald-glow: rgba(52, 211, 153, 0.3);
-        --glass-bg: rgba(0, 0, 0, 0.4);
-        --glass-border: rgba(255, 255, 255, 0.1);
-        --glass-border-hover: rgba(255, 255, 255, 0.2);
+        --charcoal: #121212;
+        --charcoal-light: #1a1a1a;
+        --charcoal-mid: #222222;
+        --neon: #DFFF00;
+        --neon-dim: rgba(223, 255, 0, 0.15);
+        --neon-glow: rgba(223, 255, 0, 0.3);
+        --grid-line: rgba(255, 255, 255, 0.04);
+        --border-subtle: rgba(255, 255, 255, 0.08);
     }
 }
 
 @layer base {
-    * {
-        @apply border-border;
-    }
-    body {
-        @apply bg-background text-foreground;
-    }
+    * { @apply border-border; }
+    body { @apply bg-background text-foreground; }
 }
 
-/* Glassmorphism */
-.glass {
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+/* Technical Grid Background */
+.bg-grid {
+    background-image:
+        linear-gradient(var(--grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 40px 40px;
 }
 
-.glass-hover:hover {
-    border-color: rgba(255, 255, 255, 0.2);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+.bg-grid-dense {
+    background-image:
+        linear-gradient(var(--grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 20px 20px;
 }
 
-/* Map Pin Animation */
-@keyframes pulse-ring {
-    0% { transform: scale(0.8); opacity: 0.8; }
-    50% { transform: scale(1.3); opacity: 0.3; }
-    100% { transform: scale(0.8); opacity: 0.8; }
+/* Blueprint card — sharp borders, no shadows, no radius */
+.bp-card {
+    background: #1a1a1a;
+    border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.map-pin-pulse {
-    animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+.bp-card-hover {
+    transition: border-color 0.2s ease;
+}
+.bp-card-hover:hover {
+    border-color: rgba(223, 255, 0, 0.3);
 }
 
-/* Glow effect */
-@keyframes glow-pulse {
-    0%, 100% { box-shadow: 0 0 8px rgba(52, 211, 153, 0.4); }
-    50% { box-shadow: 0 0 20px rgba(52, 211, 153, 0.7); }
+/* Neon accent glow */
+.neon-glow {
+    box-shadow: 0 0 1px rgba(223, 255, 0, 0.5), inset 0 0 1px rgba(223, 255, 0, 0.1);
 }
 
-.glow {
-    animation: glow-pulse 2s ease-in-out infinite;
+/* Neon button */
+.btn-neon {
+    background: #DFFF00;
+    color: #121212;
+    font-weight: 600;
+    transition: all 0.15s ease;
+}
+.btn-neon:hover {
+    background: #E8FF33;
+    box-shadow: 0 0 12px rgba(223, 255, 0, 0.3);
+}
+.btn-neon:active {
+    transform: scale(0.98);
 }
 
-/* Promoted Pin Glow */
-@keyframes promoted-glow {
-    0%, 100% { box-shadow: 0 0 8px rgba(251, 191, 36, 0.5), 0 0 16px rgba(251, 191, 36, 0.3); }
-    50% { box-shadow: 0 0 20px rgba(251, 191, 36, 0.8), 0 0 30px rgba(251, 191, 36, 0.5); }
-}
-
-/* Custom Scrollbar */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: #022c22; border-radius: 3px; }
-::-webkit-scrollbar-thumb { background: #064e3b; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #34d399; }
-
-/* License Plate Input */
-.license-plate-input {
-    font-family: 'Inter', monospace;
-    text-transform: uppercase;
-    letter-spacing: 0.2em;
-    background: rgba(52, 211, 153, 0.1);
-    border: 2px solid rgba(52, 211, 153, 0.3);
-    text-align: center;
-    font-weight: 700;
-    color: #34d399;
-}
-
-/* Leaflet Dark Mode */
+/* Map styles */
 .leaflet-container {
-    font-family: 'Inter', sans-serif;
-    border-radius: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    border-radius: 0;
     background: #0a0a0a;
 }
 
 .leaflet-popup-content-wrapper {
-    border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
-    background: #064e3b;
+    border-radius: 0;
+    box-shadow: none;
+    border: 1px solid rgba(223, 255, 0, 0.3);
+    background: #1a1a1a;
     color: #ffffff;
 }
-
-.leaflet-popup-tip { background: #064e3b; }
-
+.leaflet-popup-tip { background: #1a1a1a; }
 .leaflet-popup-content { margin: 0; }
 .leaflet-popup-tip-container { display: none; }
-
 .custom-marker-wrapper { background: transparent; border: none; }
 
-/* Button active */
-.btn-active:active { transform: scale(0.96); }
-
-/* Card hover */
-.card-hover {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+/* Pulse for map pins */
+@keyframes pulse-ring {
+    0% { transform: scale(0.8); opacity: 0.8; }
+    50% { transform: scale(1.4); opacity: 0.2; }
+    100% { transform: scale(0.8); opacity: 0.8; }
 }
-.card-hover:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+.map-pin-pulse { animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+
+/* Promoted pin */
+@keyframes promoted-glow {
+    0%, 100% { box-shadow: 0 0 6px rgba(223, 255, 0, 0.5); }
+    50% { box-shadow: 0 0 16px rgba(223, 255, 0, 0.8); }
+}
+
+/* Monospace data display */
+.data-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: #121212; }
+::-webkit-scrollbar-thumb { background: #333; }
+::-webkit-scrollbar-thumb:hover { background: #DFFF00; }
+
+/* License plate */
+.license-plate-input {
+    font-family: 'JetBrains Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    background: rgba(223, 255, 0, 0.05);
+    border: 1px solid rgba(223, 255, 0, 0.2);
+    text-align: center;
+    font-weight: 700;
+    color: #DFFF00;
 }
 
 /* Status pulse */
-@keyframes status-pulse {
+@keyframes status-blink {
     0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
+    50% { opacity: 0.3; }
 }
-.status-active { animation: status-pulse 2s ease-in-out infinite; }
+.status-active { animation: status-blink 1.5s steps(2, start) infinite; }
 
-/* Hide external badges */
+/* Hide external badge */
 #emergent-badge {
     display: none !important;
     visibility: hidden !important;
