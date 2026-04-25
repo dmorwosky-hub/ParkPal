@@ -114,25 +114,26 @@ const InstallBanner = () => {
 
   return (
     <div
-      className="fixed bottom-20 left-4 right-4 sm:left-auto sm:right-4 sm:w-80 bg-[#34495E] text-white rounded-2xl shadow-2xl p-4 z-[9998] flex items-center gap-3"
+      className="fixed bottom-6 left-4 right-4 sm:left-auto sm:right-4 sm:w-72 bg-[#1a1a1a] text-white p-4 z-[9998] flex items-center gap-3"
+      style={{ border: '1px solid rgba(223, 255, 0, 0.15)' }}
       data-testid="install-banner"
     >
-      <img src="/icon-96x96.png" alt="Park-Pal" className="w-12 h-12 rounded-xl" />
+      <img src="/icon-96x96.png" alt="Park Pal" className="w-10 h-10" />
       <div className="flex-1 min-w-0">
-        <p className="font-bold text-sm" style={{ fontFamily: 'Montserrat' }}>Install Park-Pal</p>
-        <p className="text-xs text-slate-300">Add to home screen for the best experience</p>
+        <p className="font-heading font-bold text-xs text-white">Install Park Pal</p>
+        <p className="font-mono text-[10px] text-white/30">Add to home screen</p>
       </div>
       <div className="flex gap-2 flex-shrink-0">
         <button
           onClick={() => setDismissed(true)}
-          className="text-xs text-slate-400 hover:text-white px-2 py-1"
+          className="font-mono text-[10px] text-white/20 hover:text-white/50 px-1"
           data-testid="install-dismiss-btn"
         >
           Later
         </button>
         <button
           onClick={install}
-          className="bg-[#E67E22] hover:bg-[#D35400] text-white text-xs font-bold px-4 py-2 rounded-full"
+          className="btn-neon font-mono text-[10px] uppercase tracking-wider px-3 py-1.5"
           data-testid="install-accept-btn"
         >
           Install
