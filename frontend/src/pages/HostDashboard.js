@@ -76,8 +76,7 @@ const HostDashboard = () => {
       {/* Header */}
       <header className="glass px-4 py-3 flex items-center justify-between sticky top-0 z-50 border-b border-white/5">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-none bg-[#DFFF00] flex items-center justify-center"><Car size={18} weight="bold" className="text-[#022c22]" /></div>
-          <span className="font-heading font-bold text-white tracking-tight hidden sm:block">Park-Pal</span>
+          <img src="/logo.png" alt="Park Pal" className="h-7" />
           <span className="text-xs px-2 py-0.5 rounded-md bg-[#DFFF00]/10 text-[#DFFF00] font-medium border border-[#DFFF00]/20 ml-1">Host</span>
         </div>
         <div className="flex items-center gap-2">

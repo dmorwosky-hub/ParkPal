@@ -94,8 +94,7 @@ const GuestDashboard = () => {
       {/* Header */}
       <header className="bg-[#121212] px-4 py-2.5 flex items-center justify-between z-50" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 flex items-center justify-center" style={{ border: '1px solid rgba(223,255,0,0.3)' }}><Car size={12} weight="bold" className="text-[#DFFF00]" /></div>
-          <span className="font-heading font-bold text-xs text-white tracking-wide uppercase hidden sm:block">Park-Pal</span>
+          <img src="/logo.png" alt="Park Pal" className="h-6" />
         </div>
         <div className="flex items-center gap-1.5">
           <Button variant="ghost" size="sm" className="text-white/30 hover:text-[#DFFF00] rounded-none font-mono text-[10px] uppercase tracking-wider h-7" onClick={() => navigate('/guest/bookings')} data-testid="my-bookings-btn"><ClockCountdown size={12} weight="light" className="mr-1" /> Bookings</Button>

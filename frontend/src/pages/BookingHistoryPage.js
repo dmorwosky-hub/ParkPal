@@ -49,7 +49,7 @@ const BookingHistoryPage = () => {
       <header className="glass px-4 py-3 sticky top-0 z-50 border-b border-white/5">
         <div className="max-w-4xl mx-auto flex items-center gap-3">
           <Link to="/guest/dashboard"><Button variant="ghost" size="icon" className="text-slate-400 hover:text-white hover:bg-white/5 rounded-none" data-testid="back-to-dashboard-btn"><ArrowLeft size={18} /></Button></Link>
-          <div className="flex items-center gap-2"><div className="w-8 h-8 rounded-none bg-[#DFFF00] flex items-center justify-center"><Car size={16} weight="bold" className="text-[#121212]" /></div><h1 className="font-heading font-bold text-white tracking-tight">My Bookings</h1></div>
+          <div className="flex items-center gap-2"><img src="/logo.png" alt="Park Pal" className="h-6" /><h1 className="font-heading font-bold text-white tracking-tight">My Bookings</h1></div>
         </div>
       </header>
       <main className="max-w-4xl mx-auto px-4 py-6">

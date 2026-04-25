@@ -49,6 +49,8 @@ const ParkingGridArt = () => (
   </svg>
 );
 
+const LOGO = "/logo.png";
+
 const LandingPage = () => {
   return (
     <div className="min-h-screen bg-[#121212] bg-grid">
@@ -56,10 +58,7 @@ const LandingPage = () => {
       <header className="fixed top-0 left-0 right-0 z-50 bg-[#121212]/90 backdrop-blur-sm" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-14">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 flex items-center justify-center" style={{ border: '1px solid rgba(223,255,0,0.4)' }}>
-              <Car size={14} weight="bold" className="text-[#DFFF00]" />
-            </div>
-            <span className="font-heading font-bold text-sm text-white tracking-wide uppercase">Park-Pal</span>
+            <img src={LOGO} alt="Park Pal" className="h-10" />
           </div>
           <div className="flex items-center gap-2">
             <Link to="/login">
@@ -316,10 +315,7 @@ const LandingPage = () => {
       <footer className="py-10 px-4 sm:px-6 lg:px-8" style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-5 h-5 flex items-center justify-center" style={{ border: '1px solid rgba(223,255,0,0.2)' }}>
-              <Car size={10} weight="bold" className="text-[#DFFF00]" />
-            </div>
-            <span className="font-mono text-[10px] text-white/20 uppercase tracking-wider">Park-Pal</span>
+            <img src={LOGO} alt="Park Pal" className="h-5" />
           </div>
           <div className="flex items-center gap-6">
             <Link to="/terms" className="font-mono text-[10px] text-white/15 hover:text-[#DFFF00]/50 transition-colors uppercase tracking-wider" data-testid="footer-terms-link">Terms</Link>

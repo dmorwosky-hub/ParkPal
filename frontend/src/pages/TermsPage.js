@@ -3,7 +3,7 @@ import { Car, ArrowLeft } from '@phosphor-icons/react';
 
 const TermsPage = () => (
   <div className="min-h-screen bg-[#121212]">
-    <header className="glass border-b border-white/5 sticky top-0 z-50"><div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center h-16 gap-3"><Link to="/" className="flex items-center gap-2"><div className="w-8 h-8 rounded-none bg-[#DFFF00] flex items-center justify-center"><Car size={14} weight="bold" className="text-[#121212]" /></div><span className="font-heading font-bold text-white tracking-tight">Park-Pal</span></Link></div></header>
+    <header className="glass border-b border-white/5 sticky top-0 z-50"><div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center h-16 gap-3"><Link to="/" className="flex items-center gap-2"><img src="/logo.png" alt="Park Pal" className="h-6" /></Link></div></header>
     <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <Link to="/" className="inline-flex items-center gap-2 text-slate-400 hover:text-[#DFFF00] mb-8 transition-colors text-sm"><ArrowLeft size={16} /> Back to home</Link>
       <h1 className="font-heading text-3xl sm:text-4xl font-black text-white tracking-tight mb-2" data-testid="terms-heading">Terms of Service</h1>

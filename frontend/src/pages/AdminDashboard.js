@@ -63,8 +63,7 @@ const AdminDashboard = () => {
       {/* Header */}
       <header className="bg-[#121212] px-4 py-2.5 flex items-center justify-between" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 flex items-center justify-center" style={{ border: '1px solid rgba(223,255,0,0.3)' }}><Car size={12} weight="bold" className="text-[#DFFF00]" /></div>
-          <span className="font-heading font-bold text-xs text-white tracking-wide uppercase">Admin</span>
+          <img src="/logo.png" alt="Park Pal" className="h-6" />
           <span className="font-mono text-[9px] text-[#DFFF00]/30 uppercase tracking-wider ml-2">// control_panel</span>
         </div>
         <div className="flex items-center gap-2">
