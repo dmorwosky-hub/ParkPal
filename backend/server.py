@@ -13,6 +13,9 @@ from routes.notifications import router as notifications_router
 from routes.violations import router as violations_router
 from routes.promotions import router as promotions_router
 from routes.stats import router as stats_router
+from routes.admin import router as admin_router
+from routes.verification import router as verification_router
+from routes.stripe_connect import router as stripe_connect_router
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -29,6 +32,9 @@ app.include_router(notifications_router)
 app.include_router(violations_router)
 app.include_router(promotions_router)
 app.include_router(stats_router)
+app.include_router(admin_router)
+app.include_router(verification_router)
+app.include_router(stripe_connect_router)
 
 
 # Stripe Webhook (kept at root level)
@@ -75,6 +81,32 @@ async def stripe_webhook(request: Request):
 @app.get("/api/")
 async def root():
     return {"message": "Park-Pal API", "version": "1.0.0"}
+
+
+@app.on_event("startup")
+async def startup():
+    try:
+        from storage import init_storage
+        init_storage()
+        logger.info("Object storage initialized")
+    except Exception as e:
+        logger.warning(f"Storage init deferred: {e}")
+
+    # Seed admin user
+    admin = await db.users.find_one({"email": "admin@parkpal.com"})
+    if not admin:
+        from utils import hash_password
+        import uuid
+        admin_doc = {
+            "id": str(uuid.uuid4()),
+            "email": "admin@parkpal.com",
+            "full_name": "Admin",
+            "role": "admin",
+            "password_hash": hash_password("admin123456"),
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.users.insert_one(admin_doc)
+        logger.info("Admin user created: admin@parkpal.com")
 
 
 # CORS Middleware

@@ -65,6 +65,7 @@ class ParkingSpotResponse(BaseModel):
     auto_off_time: Optional[str] = None
     is_promoted: bool = False
     promotion_expires: Optional[str] = None
+    is_verified: bool = False
     created_at: str
 
 

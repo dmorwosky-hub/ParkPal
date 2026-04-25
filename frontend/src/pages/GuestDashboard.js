@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '../components/ui/sheet';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
-import { Car, MapPin, MagnifyingGlass, Funnel, CurrencyDollar, Clock, NavigationArrow, SignOut, Bell, X, CaretRight, SpinnerGap, Star, ClockCountdown, Crosshair } from '@phosphor-icons/react';
+import { Car, MapPin, MagnifyingGlass, Funnel, CurrencyDollar, Clock, NavigationArrow, SignOut, Bell, X, CaretRight, SpinnerGap, Star, ClockCountdown, Crosshair, ShieldCheck } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import 'leaflet/dist/leaflet.css';
@@ -170,6 +170,7 @@ const GuestDashboard = () => {
                 <button className="font-mono text-[10px] text-white/20 hover:text-[#DFFF00]/50 uppercase tracking-wider" onClick={() => setSelectedSpot(null)} data-testid="back-to-list-btn">&larr; back</button>
                 <div className="bp-card p-4" data-testid="spot-details-card">
                   {selectedSpot.is_promoted && <div className="font-mono text-[9px] text-[#DFFF00] uppercase tracking-widest mb-3 flex items-center gap-1"><Star size={10} weight="fill" /> FEATURED</div>}
+                  {selectedSpot.is_verified && <div className="font-mono text-[9px] text-white/40 uppercase tracking-widest mb-3 flex items-center gap-1" data-testid="verified-badge"><ShieldCheck size={10} weight="fill" /> VERIFIED</div>}
                   <h3 className="font-heading font-bold text-white text-sm">{selectedSpot.address}</h3>
                   <p className="font-mono text-[10px] text-white/20 mt-1">{selectedSpot.city}, {selectedSpot.state} {selectedSpot.zip_code}</p>
                   {selectedSpot.description && <p className="text-white/25 text-xs mt-3">{selectedSpot.description}</p>}

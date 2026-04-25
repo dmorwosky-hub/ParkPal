@@ -14,6 +14,7 @@ import AddSpotPage from "./pages/AddSpotPage";
 import TermsPage from "./pages/TermsPage";
 import PrivacyPage from "./pages/PrivacyPage";
 import NotFoundPage from "./pages/NotFoundPage";
+import AdminDashboard from "./pages/AdminDashboard";
 import "./App.css";
 
 // Force Park-Pal branding (title + favicon) + PWA
@@ -157,7 +158,8 @@ const ProtectedRoute = ({ children, allowedRole }) => {
   }
   
   if (allowedRole && user.role !== allowedRole) {
-    return <Navigate to={user.role === 'host' ? '/host/dashboard' : '/guest/dashboard'} replace />;
+    const dest = user.role === 'host' ? '/host/dashboard' : user.role === 'admin' ? '/admin' : '/guest/dashboard';
+    return <Navigate to={dest} replace />;
   }
   
   return children;
@@ -166,7 +168,8 @@ const ProtectedRoute = ({ children, allowedRole }) => {
 const AuthRedirect = () => {
   const { user } = useAuth();
   if (user) {
-    return <Navigate to={user.role === 'host' ? '/host/dashboard' : '/guest/dashboard'} replace />;
+    const dest = user.role === 'host' ? '/host/dashboard' : user.role === 'admin' ? '/admin' : '/guest/dashboard';
+    return <Navigate to={dest} replace />;
   }
   return <LandingPage />;
 };
@@ -232,6 +235,14 @@ function App() {
           />
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
+          <Route 
+            path="/admin" 
+            element={
+              <ProtectedRoute allowedRole="admin">
+                <AdminDashboard />
+              </ProtectedRoute>
+            } 
+          />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
         <InstallBanner />
