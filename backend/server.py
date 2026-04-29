@@ -1,4 +1,6 @@
 from fastapi import FastAPI, Request
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from starlette.middleware.cors import CORSMiddleware
 from database import db, client
 from emergentintegrations.payments.stripe.checkout import StripeCheckout
@@ -165,3 +167,15 @@ app.add_middleware(
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
+
+
+# Serve compiled React frontend for all non-API routes (SPA fallback)
+_FRONTEND_BUILD = os.path.join(os.path.dirname(__file__), "..", "frontend", "build")
+
+if os.path.isdir(_FRONTEND_BUILD):
+    app.mount("/static", StaticFiles(directory=os.path.join(_FRONTEND_BUILD, "static")), name="react-static")
+
+    @app.get("/{full_path:path}")
+    async def serve_spa(full_path: str):
+        index = os.path.join(_FRONTEND_BUILD, "index.html")
+        return FileResponse(index)
