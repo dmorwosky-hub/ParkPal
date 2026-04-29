@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
@@ -9,10 +9,11 @@ import { Switch } from '../components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '../components/ui/dialog';
 import { Textarea } from '../components/ui/textarea';
-import { Car, MapPin, Plus, CurrencyDollar, Clock, Power, WarningCircle, SignOut, Bell, X, SpinnerGap, Timer, PencilSimple, Check, Sparkle, Star, Lightning, Trash, TrendUp } from '@phosphor-icons/react';
+import { Car, MapPin, Plus, CurrencyDollar, Clock, Power, WarningCircle, SignOut, Bell, X, SpinnerGap, Timer, PencilSimple, Check, Sparkle, Star, Lightning, Trash, TrendUp, QrCode, ArrowDown, Warning } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import QRCode from 'qrcode';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -37,6 +38,11 @@ const HostDashboard = () => {
   const [promoPackages, setPromoPackages] = useState([]);
   const [promoLoading, setPromoLoading] = useState(false);
   const [earnings, setEarnings] = useState(null);
+  const [qrDialog, setQrDialog] = useState(false);
+  const [qrSpot, setQrSpot] = useState(null);
+  const [qrDataUrl, setQrDataUrl] = useState('');
+  const [qrGenerating, setQrGenerating] = useState(false);
+  const canvasRef = useRef(null);
 
   const fetchSpots = useCallback(async () => { try { const r = await axios.get(`${API}/spots/my`, getAuthHeaders()); setSpots(r.data); } catch(e){} }, [getAuthHeaders]);
   const fetchActiveBookings = useCallback(async () => { try { const r = await axios.get(`${API}/bookings/active/host`, getAuthHeaders()); setActiveBookings(r.data); } catch(e){} }, [getAuthHeaders]);
@@ -65,14 +71,110 @@ const HostDashboard = () => {
   const handleReportViolation = async () => { if (!violationBooking || !violationReason) return; setViolationLoading(true); try { await axios.post(`${API}/violations/report`, { booking_id: violationBooking.id, reason: violationReason }, getAuthHeaders()); toast.success('Violation reported'); setViolationDialog(false); setViolationBooking(null); setViolationReason(''); } catch(e) { toast.error('Failed'); } finally { setViolationLoading(false); } };
   const handlePromoteSpot = async () => { if (!promoSpot || !promoPackage) return; setPromoLoading(true); try { const r = await axios.post(`${API}/promotions/checkout`, { spot_id: promoSpot.id, package: promoPackage, origin_url: window.location.origin }, getAuthHeaders()); window.location.href = r.data.checkout_url; } catch(e) { toast.error(e.response?.data?.detail || 'Failed'); setPromoLoading(false); } };
 
+  const handleGenerateQR = async (spot) => {
+    setQrSpot(spot);
+    setQrDialog(true);
+    setQrGenerating(true);
+    try {
+      const bookingUrl = `${window.location.origin}/spot/${spot.id}`;
+      const dataUrl = await QRCode.toDataURL(bookingUrl, {
+        width: 200, margin: 1, color: { dark: '#000000', light: '#FFFFFF' }
+      });
+      setQrDataUrl(dataUrl);
+    } catch(e) { toast.error('QR generation failed'); }
+    setQrGenerating(false);
+  };
+
+  const handleDownloadSign = async () => {
+    if (!qrSpot || !qrDataUrl) return;
+    const canvas = document.createElement('canvas');
+    canvas.width = 600;
+    canvas.height = 800;
+    const ctx = canvas.getContext('2d');
+
+    ctx.fillStyle = '#121212';
+    ctx.fillRect(0, 0, 600, 800);
+
+    ctx.strokeStyle = 'rgba(223,255,0,0.3)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(12, 12, 576, 776);
+    ctx.strokeStyle = 'rgba(223,255,0,0.1)';
+    ctx.strokeRect(20, 20, 560, 760);
+
+    ctx.fillStyle = '#DFFF00';
+    ctx.font = 'bold 14px JetBrains Mono, monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('PARK-PAL AUTHORIZED PARKING', 300, 65);
+
+    ctx.strokeStyle = 'rgba(223,255,0,0.15)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(40, 80); ctx.lineTo(560, 80); ctx.stroke();
+
+    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+    ctx.font = 'bold 22px Space Grotesk, sans-serif';
+    ctx.fillText(qrSpot.address, 300, 125);
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.font = '14px JetBrains Mono, monospace';
+    ctx.fillText(`${qrSpot.city}, ${qrSpot.state} ${qrSpot.zip_code}`, 300, 150);
+
+    ctx.fillStyle = '#DFFF00';
+    ctx.font = 'bold 32px Space Grotesk, sans-serif';
+    ctx.fillText(`$${qrSpot.hourly_rate}/hr`, 300, 205);
+
+    const qrImg = new Image();
+    qrImg.onload = () => {
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(175, 230, 250, 250);
+      ctx.drawImage(qrImg, 185, 240, 230, 230);
+
+      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      ctx.font = '11px JetBrains Mono, monospace';
+      ctx.fillText('SCAN TO BOOK INSTANTLY', 300, 510);
+
+      ctx.strokeStyle = 'rgba(223,255,0,0.15)';
+      ctx.beginPath(); ctx.moveTo(40, 530); ctx.lineTo(560, 530); ctx.stroke();
+
+      ctx.fillStyle = 'rgba(255,255,255,0.2)';
+      ctx.font = '11px JetBrains Mono, monospace';
+      ctx.fillText('Unauthorized vehicles will be ticketed', 300, 575);
+      ctx.fillText('Report violations at: parkpal.com', 300, 598);
+
+      ctx.fillStyle = '#DFFF00';
+      ctx.font = 'bold 13px JetBrains Mono, monospace';
+      ctx.fillText('PARK-PAL.COM', 300, 670);
+      ctx.fillStyle = 'rgba(223,255,0,0.3)';
+      ctx.font = '9px JetBrains Mono, monospace';
+      ctx.fillText('Peer-to-Peer Parking Marketplace', 300, 688);
+
+      const link = document.createElement('a');
+      link.download = `parkpal-sign-${qrSpot.id}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      toast.success('Sign downloaded!');
+    };
+    qrImg.src = qrDataUrl;
+  };
+
   const getRemainingTime = (endTime) => { if (!endTime) return null; const d = new Date(endTime) - new Date(); if (d <= 0) return 'Expired'; const h = Math.floor(d/(1000*60*60)); const m = Math.floor((d%(1000*60*60))/(1000*60)); return `${h}h ${m}m`; };
   const getPromoTimeLeft = (expires) => { if (!expires) return null; const d = new Date(expires) - new Date(); if (d <= 0) return 'Expired'; const days = Math.floor(d/(1000*60*60*24)); const h = Math.floor((d%(1000*60*60*24))/(1000*60*60)); return days > 0 ? `${days}d ${h}h` : `${h}h`; };
   const unreadCount = notifications.filter(n => !n.is_read).length;
+  const warningNotifs = notifications.filter(n => n.type === 'warning' && !n.is_read);
 
   if (loading) return <div className="min-h-screen flex items-center justify-center bg-[#121212]"><SpinnerGap size={32} weight="light" className="text-[#DFFF00] animate-spin" /></div>;
 
   return (
     <div className="min-h-screen bg-[#121212]">
+      {/* 15-min Warning Banner */}
+      <AnimatePresence>
+        {warningNotifs.length > 0 && (
+          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+            className="bg-amber-500/10 border-b border-amber-500/20 px-4 py-2 flex items-center gap-2">
+            <Warning size={14} weight="fill" className="text-amber-400" />
+            <span className="font-mono text-[11px] text-amber-300 flex-1">{warningNotifs[0].message}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Header */}
       <header className="glass px-4 py-3 flex items-center justify-between sticky top-0 z-50 border-b border-white/5">
         <div className="flex items-center gap-2.5">
@@ -95,7 +197,12 @@ const HostDashboard = () => {
       <AnimatePresence>{showNotifications && (
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="fixed top-16 right-4 w-80 bp-card shadow-[0_8px_32px_rgba(0,0,0,0.5)] z-50 overflow-hidden">
           <div className="p-4 border-b border-white/5 flex items-center justify-between"><h3 className="font-heading font-bold text-white text-sm">Notifications</h3><Button variant="ghost" size="sm" onClick={() => setShowNotifications(false)} className="text-slate-500 hover:text-white"><X size={14} /></Button></div>
-          <div className="max-h-72 overflow-y-auto">{notifications.length === 0 ? <p className="p-4 text-center text-slate-600 text-sm">No notifications</p> : notifications.slice(0, 5).map(n => <div key={n.id} className={`p-4 border-b border-white/5 ${!n.is_read ? 'bg-[#DFFF00]/5' : ''}`}><p className="font-medium text-white text-sm">{n.title}</p><p className="text-slate-500 text-xs mt-1">{n.message}</p></div>)}</div>
+          <div className="max-h-72 overflow-y-auto">{notifications.length === 0 ? <p className="p-4 text-center text-slate-600 text-sm">No notifications</p> : notifications.slice(0, 5).map(n => (
+            <div key={n.id} className={`p-4 border-b border-white/5 ${n.type === 'warning' ? 'bg-amber-500/5' : !n.is_read ? 'bg-[#DFFF00]/5' : ''}`}>
+              <div className="flex items-center gap-1.5"><p className="font-medium text-white text-sm">{n.title}</p></div>
+              <p className="text-slate-500 text-xs mt-1">{n.message}</p>
+            </div>
+          ))}</div>
         </motion.div>
       )}</AnimatePresence>
 
@@ -116,7 +223,7 @@ const HostDashboard = () => {
             </div>
           ))}
           <Link to="/host/add-spot" className="bp-card p-4 card-hover flex items-center justify-center">
-            <Button className="w-full bg-[#DFFF00] hover:bg-[#E8FF33] text-[#022c22] rounded-none font-semibold  shadow-none btn-active" data-testid="add-spot-btn">
+            <Button className="w-full bg-[#DFFF00] hover:bg-[#E8FF33] text-[#022c22] rounded-none font-semibold shadow-none btn-active" data-testid="add-spot-btn">
               <Plus size={18} weight="bold" className="mr-2" /> Add Spot
             </Button>
           </Link>
@@ -196,12 +303,18 @@ const HostDashboard = () => {
                       </div>
                     </div>
                   )}
-                  <div className="p-4 border-t border-white/5">
+                  {/* QR Sign + Promote buttons */}
+                  <div className="p-4 border-t border-white/5 flex gap-2">
+                    <Button onClick={() => handleGenerateQR(spot)} variant="outline"
+                      className="flex-1 rounded-none border-white/10 text-white/50 hover:text-[#DFFF00] hover:border-[#DFFF00]/30 text-xs"
+                      data-testid={`qr-sign-${spot.id}`}>
+                      <QrCode size={14} weight="light" className="mr-1.5" /> My Sign
+                    </Button>
                     <Button onClick={() => { setPromoSpot(spot); setPromoPackage(''); setPromoDialog(true); }}
                       variant={spot.is_promoted ? "outline" : "default"}
-                      className={`w-full rounded-none ${spot.is_promoted ? 'border-amber-500/30 text-amber-400 hover:bg-amber-500/10' : 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white'}`}
+                      className={`flex-1 rounded-none text-xs ${spot.is_promoted ? 'border-amber-500/30 text-amber-400 hover:bg-amber-500/10' : 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white'}`}
                       data-testid={`promote-spot-${spot.id}`}>
-                      <Lightning size={16} weight="fill" className="mr-2" /> {spot.is_promoted ? 'Extend Promotion' : 'Promote Spot'}
+                      <Lightning size={14} weight="fill" className="mr-1.5" /> {spot.is_promoted ? 'Extend' : 'Promote'}
                     </Button>
                   </div>
                 </div>
@@ -238,6 +351,50 @@ const HostDashboard = () => {
           </section>
         )}
       </main>
+
+      {/* QR Code / Sign Dialog */}
+      <Dialog open={qrDialog} onOpenChange={setQrDialog}>
+        <DialogContent className="sm:max-w-sm bg-[#1a1a1a] border-white/10 text-white">
+          <DialogHeader>
+            <DialogTitle className="font-heading flex items-center gap-2">
+              <QrCode size={18} weight="light" className="text-[#DFFF00]" /> Your Parking Sign
+            </DialogTitle>
+            <DialogDescription className="text-slate-400 font-mono text-[10px]">
+              Print and display at your parking spot for instant QR bookings.
+            </DialogDescription>
+          </DialogHeader>
+          {qrSpot && (
+            <div className="space-y-4">
+              {/* Blueprint-style sign preview */}
+              <div className="bg-[#121212] p-5 relative" style={{ border: '2px solid rgba(223,255,0,0.2)' }}>
+                <div className="absolute top-1 left-1 w-3 h-3 border-l-2 border-t-2 border-[#DFFF00]/30" />
+                <div className="absolute top-1 right-1 w-3 h-3 border-r-2 border-t-2 border-[#DFFF00]/30" />
+                <div className="absolute bottom-1 left-1 w-3 h-3 border-l-2 border-b-2 border-[#DFFF00]/30" />
+                <div className="absolute bottom-1 right-1 w-3 h-3 border-r-2 border-b-2 border-[#DFFF00]/30" />
+                <p className="font-mono text-[9px] text-[#DFFF00]/40 uppercase tracking-[0.3em] text-center mb-3">PARK-PAL AUTHORIZED</p>
+                <p className="font-heading text-white text-center font-bold text-sm">{qrSpot.address}</p>
+                <p className="font-mono text-white/30 text-center text-[10px] mt-0.5">{qrSpot.city}, {qrSpot.state}</p>
+                <p className="data-value text-[#DFFF00] text-center text-xl mt-2">${qrSpot.hourly_rate}/hr</p>
+                {qrGenerating ? (
+                  <div className="flex items-center justify-center mt-4 h-24"><SpinnerGap size={24} className="text-[#DFFF00] animate-spin" /></div>
+                ) : qrDataUrl ? (
+                  <div className="flex items-center justify-center mt-4">
+                    <img src={qrDataUrl} alt="QR Code" className="w-24 h-24 bg-white p-1" />
+                  </div>
+                ) : null}
+                <p className="font-mono text-[9px] text-white/20 uppercase tracking-wider text-center mt-3">Scan to book instantly</p>
+              </div>
+              <p className="font-mono text-[10px] text-white/30 text-center">Download as a high-resolution PNG to print and display.</p>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setQrDialog(false)} className="text-slate-400 hover:text-white rounded-none font-mono text-[10px] uppercase">Close</Button>
+            <Button onClick={handleDownloadSign} disabled={qrGenerating || !qrDataUrl} className="btn-neon rounded-none font-mono text-[10px] uppercase" data-testid="download-sign-btn">
+              {qrGenerating ? <SpinnerGap size={14} className="animate-spin" /> : <><ArrowDown size={12} weight="bold" className="mr-1.5" />Download Sign</>}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Violation Dialog */}
       <Dialog open={violationDialog} onOpenChange={setViolationDialog}>

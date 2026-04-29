@@ -3,35 +3,49 @@ import { Button } from '../components/ui/button';
 import { motion } from 'framer-motion';
 import { MapPin, Car, CurrencyDollar, Timer, CaretRight, Question, Lightning, ShieldCheck } from '@phosphor-icons/react';
 
-/* Inline SVG line-art components */
+const drawPath = (delay = 0, duration = 1.8) => ({
+  hidden: { pathLength: 0, opacity: 0 },
+  visible: { pathLength: 1, opacity: 1, transition: { pathLength: { duration, delay, ease: 'easeInOut' }, opacity: { duration: 0.2, delay } } }
+});
+
+/* Inline SVG line-art components with animated drawing */
 const HeroLineArt = () => (
-  <svg viewBox="0 0 800 500" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="0.8" className="absolute inset-0 w-full h-full">
-    {/* House outline */}
-    <path d="M300 350 L300 200 L400 130 L500 200 L500 350 Z" />
-    <path d="M350 350 L350 270 L450 270 L450 350" />
-    <path d="M400 130 L400 90" />
+  <motion.svg
+    viewBox="0 0 800 500" fill="none" strokeWidth="0.8"
+    className="absolute inset-0 w-full h-full"
+    initial="hidden" animate="visible"
+  >
+    {/* Corner marks — draw first */}
+    <motion.path d="M50 50 L80 50 M50 50 L50 80" stroke="rgba(223,255,0,0.12)" strokeWidth="1.2" variants={drawPath(0, 0.6)} />
+    <motion.path d="M750 50 L720 50 M750 50 L750 80" stroke="rgba(223,255,0,0.12)" strokeWidth="1.2" variants={drawPath(0.1, 0.6)} />
+    <motion.path d="M50 450 L80 450 M50 450 L50 420" stroke="rgba(223,255,0,0.12)" strokeWidth="1.2" variants={drawPath(0.2, 0.6)} />
+    <motion.path d="M750 450 L720 450 M750 450 L750 420" stroke="rgba(223,255,0,0.12)" strokeWidth="1.2" variants={drawPath(0.3, 0.6)} />
+
+    {/* House outline — main structure */}
+    <motion.path d="M300 350 L300 200 L400 130 L500 200 L500 350 Z" stroke="rgba(255,255,255,0.06)" variants={drawPath(0.5, 2.0)} />
+    <motion.path d="M350 350 L350 270 L450 270 L450 350" stroke="rgba(255,255,255,0.05)" variants={drawPath(1.2, 1.2)} />
+    <motion.path d="M400 130 L400 90" stroke="rgba(255,255,255,0.04)" variants={drawPath(1.5, 0.4)} />
+
     {/* Driveway */}
-    <path d="M320 350 L280 480 L520 480 L480 350" strokeDasharray="4 4" />
-    {/* Car outline */}
-    <path d="M340 430 L340 410 Q340 400 350 400 L450 400 Q460 400 460 410 L460 430 Z" />
-    <path d="M350 400 L360 380 L440 380 L450 400" />
-    <circle cx="365" cy="435" r="10" />
-    <circle cx="435" cy="435" r="10" />
+    <motion.path d="M320 350 L280 480 L520 480 L480 350" stroke="rgba(223,255,0,0.07)" variants={drawPath(1.8, 1.0)} style={{ strokeDasharray: '4 4' }} />
+
+    {/* Car */}
+    <motion.path d="M340 430 L340 410 Q340 400 350 400 L450 400 Q460 400 460 410 L460 430 Z" stroke="rgba(223,255,0,0.09)" variants={drawPath(2.2, 1.0)} />
+    <motion.path d="M350 400 L360 380 L440 380 L450 400" stroke="rgba(223,255,0,0.09)" variants={drawPath(2.4, 0.8)} />
+    <motion.circle cx="365" cy="435" r="10" stroke="rgba(223,255,0,0.07)" variants={drawPath(2.8, 0.5)} />
+    <motion.circle cx="435" cy="435" r="10" stroke="rgba(223,255,0,0.07)" variants={drawPath(2.9, 0.5)} />
+
     {/* Measurement lines */}
-    <path d="M270 200 L270 350" strokeDasharray="2 6" stroke="rgba(223,255,0,0.08)" />
-    <path d="M530 200 L530 350" strokeDasharray="2 6" stroke="rgba(223,255,0,0.08)" />
-    <path d="M270 200 L280 200 M270 350 L280 350" stroke="rgba(223,255,0,0.08)" />
-    <path d="M530 200 L520 200 M530 350 L520 350" stroke="rgba(223,255,0,0.08)" />
-    {/* Grid reference marks */}
-    <path d="M100 250 L150 250" strokeDasharray="2 4" stroke="rgba(255,255,255,0.03)" />
-    <path d="M650 300 L700 300" strokeDasharray="2 4" stroke="rgba(255,255,255,0.03)" />
-    <path d="M400 50 L400 80" strokeDasharray="2 4" stroke="rgba(255,255,255,0.03)" />
-    {/* Corner marks */}
-    <path d="M50 50 L80 50 M50 50 L50 80" stroke="rgba(223,255,0,0.1)" strokeWidth="1" />
-    <path d="M750 50 L720 50 M750 50 L750 80" stroke="rgba(223,255,0,0.1)" strokeWidth="1" />
-    <path d="M50 450 L80 450 M50 450 L50 420" stroke="rgba(223,255,0,0.1)" strokeWidth="1" />
-    <path d="M750 450 L720 450 M750 450 L750 420" stroke="rgba(223,255,0,0.1)" strokeWidth="1" />
-  </svg>
+    <motion.path d="M270 200 L270 350" stroke="rgba(223,255,0,0.06)" variants={drawPath(3.0, 0.8)} style={{ strokeDasharray: '2 6' }} />
+    <motion.path d="M530 200 L530 350" stroke="rgba(223,255,0,0.06)" variants={drawPath(3.1, 0.8)} style={{ strokeDasharray: '2 6' }} />
+    <motion.path d="M270 200 L280 200 M270 350 L280 350" stroke="rgba(223,255,0,0.06)" variants={drawPath(3.2, 0.4)} />
+    <motion.path d="M530 200 L520 200 M530 350 L520 350" stroke="rgba(223,255,0,0.06)" variants={drawPath(3.3, 0.4)} />
+
+    {/* Grid reference lines */}
+    <motion.path d="M100 250 L150 250" stroke="rgba(255,255,255,0.03)" variants={drawPath(3.4, 0.4)} style={{ strokeDasharray: '2 4' }} />
+    <motion.path d="M650 300 L700 300" stroke="rgba(255,255,255,0.03)" variants={drawPath(3.5, 0.4)} style={{ strokeDasharray: '2 4' }} />
+    <motion.path d="M400 50 L400 80" stroke="rgba(255,255,255,0.03)" variants={drawPath(3.6, 0.3)} style={{ strokeDasharray: '2 4' }} />
+  </motion.svg>
 );
 
 const ParkingGridArt = () => (

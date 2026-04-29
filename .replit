@@ -55,16 +55,15 @@ args = "cd frontend && PORT=5000 HOST=0.0.0.0 REACT_APP_BACKEND_URL='' node node
 waitForPort = 5000
 
 [[ports]]
-localPort = 8000
-externalPort = 80
-exposeLocalhost = true
-
-[[ports]]
-localPort = 8001
-externalPort = 3001
-
-[[ports]]
 localPort = 5000
+externalPort = 5000
+
+[[ports]]
+localPort = 5001
+externalPort = 3000
+
+[[ports]]
+localPort = 8000
 externalPort = 80
 
 [deployment]

@@ -8,6 +8,48 @@ from datetime import datetime, timezone, timedelta
 
 router = APIRouter(prefix="/api/spots", tags=["spots"])
 
+# Price suggestion lookup by zip code prefix (first 3 digits → density zone)
+PRICE_ZONES = {
+    # Major metro dense zones (first 3 digits of zip)
+    "100": 25, "101": 22, "102": 20, "103": 18, "104": 16,  # NYC
+    "941": 22, "940": 20, "942": 18, "943": 16, "944": 14,  # SF Bay Area
+    "900": 20, "901": 18, "902": 16, "903": 14,              # LA
+    "606": 18, "607": 16, "608": 14,                          # Chicago
+    "770": 16, "772": 15, "773": 14,                          # Houston
+    "852": 16, "853": 15,                                     # Phoenix
+    "191": 18, "192": 16, "193": 15,                          # Philadelphia
+    "782": 16, "784": 14,                                     # San Antonio
+    "752": 16, "750": 15, "751": 14,                          # Dallas
+    "302": 15, "303": 14,                                     # San Jose / Atlanta
+}
+
+
+@router.get("/price-suggestion")
+async def get_price_suggestion(zip_code: str):
+    """Suggest an hourly rate based on zip code density."""
+    prefix3 = zip_code[:3] if len(zip_code) >= 3 else zip_code
+    suggested = PRICE_ZONES.get(prefix3)
+    if not suggested:
+        # Default tiering by first digit
+        first_digit = zip_code[0] if zip_code else "5"
+        defaults = {"0": 18, "1": 16, "2": 14, "3": 13, "4": 12, "5": 10, "6": 12, "7": 11, "8": 12, "9": 15}
+        suggested = defaults.get(first_digit, 12)
+
+    zone = "high-density" if suggested >= 18 else ("medium-density" if suggested >= 14 else "standard")
+    return {
+        "zip_code": zip_code,
+        "suggested_rate": suggested,
+        "suggested_min": max(1, round(suggested * 0.7)),
+        "suggested_max": round(suggested * 1.5),
+        "suggested_hourly_rate": suggested,
+        "suggested_event_rate": round(suggested * 2.5),
+        "suggested_monthly": round(suggested * 22 * 8),
+        "suggested_monthly_rate": round(suggested * 22 * 8),
+        "demand_level": zone,
+        "zone": zone,
+        "reasoning": f"ZIP {zip_code[:3]}xx area · {zone.replace('-', ' ')} parking market",
+    }
+
 
 @router.post("", response_model=ParkingSpotResponse)
 async def create_parking_spot(spot_data: ParkingSpotCreate, user: dict = Depends(get_current_user)):
@@ -32,6 +74,10 @@ async def create_parking_spot(spot_data: ParkingSpotCreate, user: dict = Depends
         "auto_off_time": None,
         "is_promoted": False,
         "promotion_expires": None,
+        "has_monthly_lease": spot_data.has_monthly_lease,
+        "monthly_rate": spot_data.monthly_rate,
+        "lease_schedule": spot_data.lease_schedule,
+        "is_verified": False,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     await db.parking_spots.insert_one(spot_doc)

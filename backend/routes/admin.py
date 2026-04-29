@@ -1,10 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
-from fastapi.responses import Response
+from fastapi.responses import Response, StreamingResponse
 from utils import get_current_user
 from database import db
 from storage import get_object
 from datetime import datetime, timezone
 import logging
+import csv
+import io
 
 logger = logging.getLogger(__name__)
 
@@ -242,6 +244,80 @@ async def system_health(user: dict = Depends(require_admin)):
             ]
         }
     }
+
+
+@router.get("/export")
+async def export_growth_data(user: dict = Depends(require_admin)):
+    """Export all growth data as CSV for owner reporting."""
+    output = io.StringIO()
+
+    # --- Sheet 1: Bookings ---
+    bookings = await db.bookings.find({}, {"_id": 0}).sort("created_at", -1).to_list(5000)
+
+    writer = csv.writer(output)
+    writer.writerow(["=== BOOKINGS ==="])
+    writer.writerow(["id", "spot_id", "guest_id", "guest_name", "license_plate", "vehicle_make",
+                     "vehicle_model", "hours", "total_amount", "platform_fee", "host_payout",
+                     "status", "payment_status", "start_time", "end_time", "created_at"])
+    for b in bookings:
+        writer.writerow([
+            b.get("id"), b.get("spot_id"), b.get("guest_id"), b.get("guest_name"),
+            b.get("license_plate"), b.get("vehicle_make"), b.get("vehicle_model"),
+            b.get("hours"), b.get("total_amount"), b.get("platform_fee"), b.get("host_payout"),
+            b.get("status"), b.get("payment_status"), b.get("start_time"), b.get("end_time"),
+            b.get("created_at")
+        ])
+
+    writer.writerow([])
+    writer.writerow(["=== DEMAND PINS (PARKING REQUESTS) ==="])
+    pins = await db.demand_pins.find({}, {"_id": 0, "upvoters": 0}).sort("created_at", -1).to_list(2000)
+    writer.writerow(["id", "user_id", "latitude", "longitude", "address", "note",
+                     "desired_price_max", "upvotes", "created_at"])
+    for p in pins:
+        writer.writerow([
+            p.get("id"), p.get("user_id"), p.get("latitude"), p.get("longitude"),
+            p.get("address"), p.get("note"), p.get("desired_price_max"),
+            p.get("upvotes", 0), p.get("created_at")
+        ])
+
+    writer.writerow([])
+    writer.writerow(["=== USER GROWTH ==="])
+    users = await db.users.find({}, {"_id": 0, "password_hash": 0}).sort("created_at", 1).to_list(5000)
+    writer.writerow(["id", "email", "full_name", "role", "is_blocked", "created_at"])
+    for u in users:
+        writer.writerow([
+            u.get("id"), u.get("email"), u.get("full_name"), u.get("role"),
+            u.get("is_blocked", False), u.get("created_at")
+        ])
+
+    writer.writerow([])
+    writer.writerow(["=== SUBSCRIPTIONS (MONTHLY LEASES) ==="])
+    subs = await db.subscriptions.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
+    writer.writerow(["id", "spot_id", "spot_address", "guest_id", "guest_name",
+                     "monthly_rate", "schedule", "status", "created_at"])
+    for s in subs:
+        writer.writerow([
+            s.get("id"), s.get("spot_id"), s.get("spot_address"), s.get("guest_id"),
+            s.get("guest_name"), s.get("monthly_rate"), s.get("schedule"),
+            s.get("status"), s.get("created_at")
+        ])
+
+    output.seek(0)
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+    filename = f"parkpal_growth_export_{timestamp}.csv"
+
+    return StreamingResponse(
+        iter([output.getvalue()]),
+        media_type="text/csv",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'}
+    )
+
+
+@router.get("/demand-pins")
+async def admin_demand_pins(user: dict = Depends(require_admin)):
+    """Get all demand pins with enriched user info for admin heatmap."""
+    pins = await db.demand_pins.find({}, {"_id": 0, "upvoters": 0}).sort("created_at", -1).to_list(2000)
+    return {"pins": pins, "total": len(pins)}
 
 
 @router.get("/files/{path:path}")

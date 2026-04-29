@@ -38,6 +38,9 @@ class ParkingSpotCreate(BaseModel):
     hourly_rate: float
     event_rate: Optional[float] = None
     description: Optional[str] = None
+    has_monthly_lease: bool = False
+    monthly_rate: Optional[float] = None
+    lease_schedule: Optional[str] = "first_of_month"
 
 
 class ParkingSpotUpdate(BaseModel):
@@ -46,6 +49,9 @@ class ParkingSpotUpdate(BaseModel):
     event_rate: Optional[float] = None
     auto_off_hours: Optional[int] = None
     description: Optional[str] = None
+    has_monthly_lease: Optional[bool] = None
+    monthly_rate: Optional[float] = None
+    lease_schedule: Optional[str] = None
 
 
 class ParkingSpotResponse(BaseModel):
@@ -66,6 +72,9 @@ class ParkingSpotResponse(BaseModel):
     is_promoted: bool = False
     promotion_expires: Optional[str] = None
     is_verified: bool = False
+    has_monthly_lease: bool = False
+    monthly_rate: Optional[float] = None
+    lease_schedule: Optional[str] = None
     created_at: str
 
 

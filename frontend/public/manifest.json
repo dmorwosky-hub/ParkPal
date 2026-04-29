@@ -15,8 +15,13 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "orientation": "portrait",
-  "theme_color": "#E67E22",
-  "background_color": "#ECF0F1",
-  "categories": ["business", "lifestyle", "navigation"]
+  "orientation": "portrait-primary",
+  "theme_color": "#DFFF00",
+  "background_color": "#121212",
+  "categories": ["business", "lifestyle", "navigation"],
+  "prefer_related_applications": false,
+  "shortcuts": [
+    { "name": "Find Parking", "short_name": "Find", "url": "/login", "description": "Search for available parking spots" },
+    { "name": "My Bookings", "short_name": "Bookings", "url": "/guest/bookings", "description": "View your active bookings" }
+  ]
 }

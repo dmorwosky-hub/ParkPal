@@ -3,9 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import { Button } from '../components/ui/button';
-import { Car, Users, MapPin, CurrencyDollar, ChartBar, ShieldCheck, WarningCircle, SignOut, Gear, Check, X, Prohibit, Eye, SpinnerGap } from '@phosphor-icons/react';
+import { Car, Users, MapPin, CurrencyDollar, ChartBar, ShieldCheck, WarningCircle, SignOut, Gear, Check, X, Prohibit, Eye, SpinnerGap, Export, PushPin } from '@phosphor-icons/react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet';
 import { toast } from 'sonner';
+import 'leaflet/dist/leaflet.css';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -19,6 +21,8 @@ const AdminDashboard = () => {
   const [pendingSpots, setPendingSpots] = useState({ spots: [] });
   const [health, setHealth] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [demandPins, setDemandPins] = useState([]);
+  const [exportLoading, setExportLoading] = useState(false);
 
   const h = useCallback(() => getAuthHeaders(), [getAuthHeaders]);
   const fetchDashboard = useCallback(async () => { try { const r = await axios.get(`${API}/admin/dashboard`, h()); setDashboard(r.data); } catch(e){ console.error(e); } }, [h]);
@@ -26,14 +30,15 @@ const AdminDashboard = () => {
   const fetchViolations = useCallback(async () => { try { const r = await axios.get(`${API}/admin/violations`, h()); setViolations(r.data); } catch(e){} }, [h]);
   const fetchPending = useCallback(async () => { try { const r = await axios.get(`${API}/admin/spots/pending-verification`, h()); setPendingSpots(r.data); } catch(e){} }, [h]);
   const fetchHealth = useCallback(async () => { try { const r = await axios.get(`${API}/admin/system-health`, h()); setHealth(r.data); } catch(e){} }, [h]);
+  const fetchDemandPins = useCallback(async () => { try { const r = await axios.get(`${API}/admin/demand-pins`, h()); setDemandPins(r.data); } catch(e){} }, [h]);
 
   useEffect(() => {
     (async () => {
       setLoading(true);
-      await Promise.all([fetchDashboard(), fetchUsers(), fetchViolations(), fetchPending(), fetchHealth()]);
+      await Promise.all([fetchDashboard(), fetchUsers(), fetchViolations(), fetchPending(), fetchHealth(), fetchDemandPins()]);
       setLoading(false);
     })();
-  }, [fetchDashboard, fetchUsers, fetchViolations, fetchPending, fetchHealth]);
+  }, [fetchDashboard, fetchUsers, fetchViolations, fetchPending, fetchHealth, fetchDemandPins]);
 
   const handleBlockUser = async (userId) => {
     try { await axios.post(`${API}/admin/users/${userId}/block`, {}, h()); fetchUsers(); toast.success('User status updated'); } catch(e) { toast.error('Failed'); }
@@ -48,6 +53,25 @@ const AdminDashboard = () => {
     try { await axios.post(`${API}/admin/violations/${vid}/resolve`, {}, h()); fetchViolations(); toast.success('Resolved'); } catch(e) { toast.error('Failed'); }
   };
 
+  const handleExport = async () => {
+    setExportLoading(true);
+    try {
+      const response = await axios.get(`${API}/admin/export`, {
+        ...h(),
+        responseType: 'blob'
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `parkpal-export-${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      toast.success('Data exported successfully');
+    } catch(e) { toast.error('Export failed'); } finally { setExportLoading(false); }
+  };
+
   if (loading) return <div className="min-h-screen flex items-center justify-center bg-[#121212]"><SpinnerGap size={32} className="text-[#DFFF00] animate-spin" /></div>;
 
   const tabs = [
@@ -55,6 +79,7 @@ const AdminDashboard = () => {
     { id: 'users', label: 'Users', icon: Users },
     { id: 'verification', label: 'Verification', icon: ShieldCheck },
     { id: 'disputes', label: 'Disputes', icon: WarningCircle },
+    { id: 'demand', label: 'Demand Map', icon: PushPin },
     { id: 'health', label: 'System', icon: Gear },
   ];
 
@@ -67,6 +92,12 @@ const AdminDashboard = () => {
           <span className="font-mono text-[9px] text-[#DFFF00]/30 uppercase tracking-wider ml-2">// control_panel</span>
         </div>
         <div className="flex items-center gap-2">
+          <Button onClick={handleExport} disabled={exportLoading}
+            className="h-7 btn-neon rounded-none font-mono text-[9px] uppercase tracking-wider px-3 flex items-center gap-1.5"
+            data-testid="export-btn">
+            {exportLoading ? <SpinnerGap size={10} className="animate-spin" /> : <Export size={10} weight="bold" />}
+            Export CSV
+          </Button>
           <span className="font-mono text-[10px] text-white/30">{user?.email}</span>
           <Button variant="ghost" size="icon" onClick={() => { logout(); navigate('/'); }} className="text-white/20 hover:text-red-400 rounded-none h-7 w-7" data-testid="admin-logout"><SignOut size={14} /></Button>
         </div>
@@ -89,7 +120,9 @@ const AdminDashboard = () => {
           {/* OVERVIEW */}
           {tab === 'overview' && dashboard && (
             <div className="space-y-6">
-              <div className="font-mono text-[10px] text-[#DFFF00]/30 uppercase tracking-[0.3em]">// revenue_overview</div>
+              <div className="flex items-center justify-between">
+                <div className="font-mono text-[10px] text-[#DFFF00]/30 uppercase tracking-[0.3em]">// revenue_overview</div>
+              </div>
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-[1px] bg-white/[0.04]">
                 {[
                   { label: 'TOTAL_REVENUE', value: `$${dashboard.revenue.total.toFixed(2)}`, color: 'text-[#DFFF00]' },
@@ -185,7 +218,7 @@ const AdminDashboard = () => {
                     <span className="font-mono text-[9px] text-amber-400 uppercase">Pending</span>
                   </div>
                   {s.verification_photo_path && (
-                    <div className="mb-3 text-xs text-white/30 font-mono">Photo uploaded: {s.verification_photo_path.split('/').pop()}</div>
+                    <div className="mb-3 text-xs text-white/30 font-mono">Photo: {s.verification_photo_path.split('/').pop()}</div>
                   )}
                   <div className="flex gap-2">
                     <Button onClick={() => handleVerifySpot(s.id)} className="h-8 btn-neon rounded-none font-mono text-[10px] uppercase" data-testid={`approve-${s.id}`}>
@@ -227,6 +260,71 @@ const AdminDashboard = () => {
                   )}
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* DEMAND MAP */}
+          {tab === 'demand' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="font-mono text-[10px] text-[#DFFF00]/30 uppercase tracking-[0.3em]">// demand_heatmap ({demandPins.length} requests)</div>
+                <Button onClick={fetchDemandPins} variant="ghost" className="h-7 font-mono text-[9px] text-white/20 uppercase rounded-none">Refresh</Button>
+              </div>
+
+              <div className="bg-[#1a1a1a]" style={{ border: '1px solid rgba(255,255,255,0.04)', height: '420px' }}>
+                <MapContainer center={[34.0522, -118.2437]} zoom={10} style={{ height: '100%', width: '100%' }}>
+                  <TileLayer attribution='&copy; CARTO' url="https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png" />
+                  {demandPins.map(pin => {
+                    const radius = Math.max(8, Math.min(30, 8 + (pin.upvote_count || 0) * 3));
+                    return (
+                      <CircleMarker key={pin.id} center={[pin.latitude, pin.longitude]}
+                        radius={radius}
+                        pathOptions={{ color: '#FF6B35', fillColor: '#FF6B35', fillOpacity: 0.4, weight: 1.5 }}>
+                        <Popup>
+                          <div className="font-mono text-xs p-2">
+                            <div className="text-[#FF6B35] uppercase text-[9px] mb-1">Demand Hotspot</div>
+                            {pin.address_hint && <p className="text-sm mb-1">{pin.address_hint}</p>}
+                            {pin.zip_code && <p className="text-xs text-gray-500">ZIP: {pin.zip_code}</p>}
+                            {pin.note && <p className="text-xs text-gray-500 mt-1">{pin.note}</p>}
+                            <p className="text-xs mt-2 font-bold">{pin.upvote_count || 0} upvotes</p>
+                          </div>
+                        </Popup>
+                      </CircleMarker>
+                    );
+                  })}
+                </MapContainer>
+              </div>
+
+              <div className="flex items-center gap-4 font-mono text-[10px] text-white/20">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 rounded-full bg-[#FF6B35]/60" style={{ width: '8px', height: '8px' }} />
+                  <span>Small circle = low demand</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-4 h-4 rounded-full bg-[#FF6B35]/60" />
+                  <span>Large circle = high demand</span>
+                </div>
+              </div>
+
+              {/* Demand list */}
+              {demandPins.length > 0 && (
+                <div className="space-y-[1px]">
+                  <div className="font-mono text-[10px] text-white/15 uppercase tracking-wider mb-2">Top Requests</div>
+                  {[...demandPins].sort((a, b) => (b.upvote_count || 0) - (a.upvote_count || 0)).slice(0, 10).map(pin => (
+                    <div key={pin.id} className="bg-[#1a1a1a] p-3 flex items-center justify-between" style={{ border: '1px solid rgba(255,255,255,0.03)' }}>
+                      <div>
+                        <p className="font-mono text-xs text-white/60">{pin.address_hint || `${pin.latitude.toFixed(3)}, ${pin.longitude.toFixed(3)}`}</p>
+                        {pin.zip_code && <p className="font-mono text-[9px] text-white/20">ZIP {pin.zip_code}</p>}
+                        {pin.note && <p className="font-mono text-[9px] text-white/20 mt-0.5">{pin.note}</p>}
+                      </div>
+                      <div className="text-right">
+                        <p className="data-value text-lg text-[#FF6B35]">{pin.upvote_count || 0}</p>
+                        <p className="font-mono text-[9px] text-white/20">wants</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 

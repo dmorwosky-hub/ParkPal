@@ -4,6 +4,7 @@ from database import db, client
 from emergentintegrations.payments.stripe.checkout import StripeCheckout
 import os
 import logging
+import asyncio
 from datetime import datetime, timezone, timedelta
 
 from routes.auth import router as auth_router
@@ -16,6 +17,8 @@ from routes.stats import router as stats_router
 from routes.admin import router as admin_router
 from routes.verification import router as verification_router
 from routes.stripe_connect import router as stripe_connect_router
+from routes.demand_pins import router as demand_pins_router
+from routes.subscriptions import router as subscriptions_router
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -35,6 +38,8 @@ app.include_router(stats_router)
 app.include_router(admin_router)
 app.include_router(verification_router)
 app.include_router(stripe_connect_router)
+app.include_router(demand_pins_router)
+app.include_router(subscriptions_router)
 
 
 # Stripe Webhook (kept at root level)
@@ -83,6 +88,41 @@ async def root():
     return {"message": "Park-Pal API", "version": "1.0.0"}
 
 
+async def _notification_watchdog():
+    """Background task: fires 15-min warning notifications + extend-stay links."""
+    await asyncio.sleep(10)  # let server fully start
+    while True:
+        try:
+            now = datetime.now(timezone.utc)
+            warn_window = now + timedelta(minutes=15)
+
+            # Find confirmed bookings ending in the next 15 minutes that haven't been warned
+            bookings = await db.bookings.find({
+                "status": "confirmed",
+                "end_time": {"$gt": now.isoformat(), "$lte": warn_window.isoformat()},
+                "fifteen_min_warning_sent": {"$ne": True}
+            }, {"_id": 0}).to_list(100)
+
+            for b in bookings:
+                from utils import create_notification
+                await create_notification(
+                    b["guest_id"],
+                    "⏰ 15-Minute Parking Warning",
+                    f"Your parking at {b.get('spot_address', 'your spot')} expires soon. "
+                    f"Tap to extend your stay.",
+                    "warning"
+                )
+                await db.bookings.update_one(
+                    {"id": b["id"]},
+                    {"$set": {"fifteen_min_warning_sent": True}}
+                )
+
+        except Exception as e:
+            logger.error(f"Notification watchdog error: {e}")
+
+        await asyncio.sleep(60)  # check every minute
+
+
 @app.on_event("startup")
 async def startup():
     try:
@@ -107,6 +147,9 @@ async def startup():
         }
         await db.users.insert_one(admin_doc)
         logger.info("Admin user created: admin@parkpal.com")
+
+    # Start background notification watchdog
+    asyncio.create_task(_notification_watchdog())
 
 
 # CORS Middleware
