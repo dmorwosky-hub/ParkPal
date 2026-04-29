@@ -177,5 +177,9 @@ if os.path.isdir(_FRONTEND_BUILD):
 
     @app.get("/{full_path:path}")
     async def serve_spa(full_path: str):
-        index = os.path.join(_FRONTEND_BUILD, "index.html")
-        return FileResponse(index)
+        # Serve real files (images, manifest, sw.js, etc.) directly
+        candidate = os.path.join(_FRONTEND_BUILD, full_path)
+        if full_path and os.path.isfile(candidate):
+            return FileResponse(candidate)
+        # All other paths → SPA index.html
+        return FileResponse(os.path.join(_FRONTEND_BUILD, "index.html"))
